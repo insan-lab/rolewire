@@ -1,0 +1,124 @@
+import { CheckCircle2 } from "lucide-react";
+import type { Metadata } from "next";
+
+import { UnlinkProviderButton } from "@/components/app/unlink-provider-button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardBody, CardHeader, Callout, PageHeader } from "@/components/ui/surface";
+import { getCurrentUser } from "@/lib/api/server";
+import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
+
+export const metadata: Metadata = { title: "Account" };
+
+const LABELS: Record<OAuthProvider, string> = {
+  google: "Google",
+  github: "GitHub",
+  facebook: "Facebook",
+  linkedin: "LinkedIn",
+};
+
+const ERROR_MESSAGES: Record<string, string> = {
+  unknown_provider: "Rolewire supports Google, GitHub, Facebook and LinkedIn.",
+  provider_not_configured: "That provider isn't configured on this deployment yet.",
+  oauth_start_failed: "Couldn't start that sign-in. Try again in a moment.",
+};
+
+export default async function AccountSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ linked?: string; error?: string }>;
+}) {
+  const [user, { linked, error }] = await Promise.all([getCurrentUser(), searchParams]);
+  const linkedSet = new Set(user.oauth_providers);
+
+  return (
+    <>
+      <PageHeader title="Account" description="Your sign-in and identity for this workspace." />
+
+      <div className="space-y-5">
+        {linked ? (
+          <Callout tone="success">{LABELS[linked as OAuthProvider] ?? linked} linked to your account.</Callout>
+        ) : null}
+        {error ? <Callout tone="danger">{ERROR_MESSAGES[error] ?? "That didn't work. Try again."}</Callout> : null}
+
+        <Card>
+          <CardHeader title="Email" />
+          <CardBody className="space-y-2">
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-zinc-900">{user.email}</p>
+              {user.email_verified ? (
+                <Badge tone="success">
+                  <CheckCircle2 className="size-3" /> Verified
+                </Badge>
+              ) : (
+                <Badge tone="warning">Unverified</Badge>
+              )}
+            </div>
+            {!user.email_deliverable ? (
+              <Callout tone="warning">
+                Notification emails to this address have been bouncing. Update it once email changes
+                are supported, or check your inbox for delivery problems.
+              </Callout>
+            ) : null}
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader title="Password" />
+          <CardBody>
+            {user.has_password ? (
+              <Callout tone="neutral">
+                Your account has a password set. Changing it from this panel isn&rsquo;t available
+                yet — contact support if you need it reset.
+              </Callout>
+            ) : (
+              <Callout tone="neutral">
+                You signed up with a social provider and have no password set. Link an email/password
+                login by contacting support, or keep using the providers below.
+              </Callout>
+            )}
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="Linked sign-in providers"
+            description="Add more ways to sign in, or remove ones you no longer use."
+          />
+          <ul className="divide-y divide-zinc-100">
+            {OAUTH_PROVIDERS.map((provider) => {
+              const isLinked = linkedSet.has(provider);
+              const onlyLoginMethod = isLinked && !user.has_password && linkedSet.size === 1;
+              return (
+                <li key={provider} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900">{LABELS[provider]}</p>
+                    <p className="text-xs text-zinc-500">
+                      {isLinked ? "Linked" : "Not linked"}
+                      {onlyLoginMethod ? " · your only sign-in method" : ""}
+                    </p>
+                  </div>
+                  {isLinked ? (
+                    onlyLoginMethod ? (
+                      <span className="text-xs text-zinc-400">Can&rsquo;t unlink</span>
+                    ) : (
+                      <UnlinkProviderButton provider={provider} label={LABELS[provider]} />
+                    )
+                  ) : (
+                    <form method="POST" action={`/api/auth/oauth/${provider}/link`}>
+                      <button
+                        type="submit"
+                        className="h-8 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
+                      >
+                        Link
+                      </button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      </div>
+    </>
+  );
+}

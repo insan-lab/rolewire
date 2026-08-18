@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import type { Application } from "@/lib/api/types";
+
 /** Tailwind-aware class merge, so component-level classes can override defaults predictably. */
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -103,4 +105,14 @@ export function formatBytesFromMb(megabytes: number): string {
 /** Compact plural helper: pluralize(1, "application") → "1 application". */
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
+}
+
+/** Applicant-identifying answer, best-effort: the question set is tenant-defined. */
+export function applicantLabel(application: Application): string {
+  const answers = application.answers as Record<string, unknown>;
+  for (const key of ["full_name", "name", "first_name", "applicant_name"]) {
+    const value = answers[key];
+    if (typeof value === "string" && value.trim()) return value;
+  }
+  return application.applicant_email ?? "Applicant";
 }
