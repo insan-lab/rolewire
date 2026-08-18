@@ -61,8 +61,16 @@ class Settings(BaseSettings):
     brevo_api_key: str = ""
     brevo_webhook_secret: str = ""
     paddle_webhook_secret: str = ""
+    paddle_api_key: str = ""
+    paddle_environment: Literal["sandbox", "production"] = "sandbox"
     uddoktapay_api_key: str = ""
     uddoktapay_webhook_secret: str = ""
+    uddoktapay_base_url: str = ""
+
+    # Admin panel origin, used to build checkout return URLs.
+    app_base_url: str = "http://localhost:3000"
+    # Days a subscription may stay past_due before the tenant is suspended (§9.4).
+    grace_period_days: int = 5
 
     oauth_google_client_id: str = ""
     oauth_google_client_secret: str = ""

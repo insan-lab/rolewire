@@ -97,6 +97,17 @@ async def set_public_context(session: AsyncSession) -> None:
     await session.execute(text("SELECT set_config('app.public_context', 'on', true)"))
 
 
+async def set_auth_context(session: AsyncSession) -> None:
+    """Unlock the pre-authentication identity lookup policies on ``users``/``oauth_accounts``.
+
+    Login and OAuth callbacks must find a user *before* a tenant is known. The policy this flag
+    unlocks is SELECT-only, so a leaked auth context still cannot mutate another tenant's rows.
+    """
+    if not _rls_enabled():
+        return
+    await session.execute(text("SELECT set_config('app.auth_context', 'on', true)"))
+
+
 async def get_db() -> AsyncIterator[AsyncSession]:
     """FastAPI dependency: one session (and one transaction) per request."""
     async with get_sessionmaker()() as session:

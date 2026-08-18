@@ -7,7 +7,7 @@ Column types are chosen so the same models run on Postgres (production) and SQLi
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -51,8 +51,26 @@ def _pk() -> Mapped[uuid.UUID]:
     return mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
 
+def _utcnow() -> datetime:
+    return datetime.now(UTC)
+
+
 def _created_at() -> Mapped[datetime]:
-    return mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    # Python-side default as well as server_default so the value is available immediately
+    # after flush without an extra round-trip.
+    return mapped_column(
+        DateTime(timezone=True), default=_utcnow, server_default=func.now(), nullable=False
+    )
+
+
+def _updated_at() -> Mapped[datetime]:
+    return mapped_column(
+        DateTime(timezone=True),
+        default=_utcnow,
+        server_default=func.now(),
+        onupdate=_utcnow,
+        nullable=False,
+    )
 
 
 class Plan(Base):
@@ -190,9 +208,7 @@ class Job(Base):
     ats_webhook_url: Mapped[str | None] = mapped_column(Text)
     opencats_sync: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = _created_at()
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
+    updated_at: Mapped[datetime] = _updated_at()
 
     __table_args__ = (
         CheckConstraint("status IN ('draft','published','closed')", name="jobs_status_check"),
@@ -289,9 +305,7 @@ class UsageEvent(Base):
     )
     event_type: Mapped[str] = mapped_column(String(32), nullable=False)
     quantity: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False)
-    occurred_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
+    occurred_at: Mapped[datetime] = _created_at()
 
     __table_args__ = (
         CheckConstraint(
@@ -318,9 +332,7 @@ class Subscription(Base):
     status: Mapped[str] = mapped_column(String(16), default="active", nullable=False)
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = _created_at()
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
+    updated_at: Mapped[datetime] = _updated_at()
 
     __table_args__ = (
         CheckConstraint("provider IN ('paddle','uddoktapay')", name="subscriptions_provider_check"),

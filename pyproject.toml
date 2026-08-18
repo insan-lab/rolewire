@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg==0.31.0",
     "alembic==1.19.1",
     "pydantic==2.13.4",
+    "email-validator==2.3.0",
     "pydantic-settings==2.15.0",
     "pyjwt==2.13.0",
     "argon2-cffi==25.1.0",
@@ -38,3 +39,8 @@ filterwarnings = ["ignore::DeprecationWarning"]
 [tool.ruff]
 line-length = 100
 target-version = "py312"
+src = ["api"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C4", "SIM"]
+ignore = ["E501"]
