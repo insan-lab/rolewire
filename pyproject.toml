@@ -1,0 +1,40 @@
+[project]
+name = "rolewire"
+version = "0.1.0"
+description = "Headless job-posting and application-collection API"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.141.1",
+    "uvicorn[standard]==0.52.3",
+    "sqlalchemy[asyncio]==2.0.52",
+    "asyncpg==0.31.0",
+    "alembic==1.19.1",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.15.0",
+    "pyjwt==2.13.0",
+    "argon2-cffi==25.1.0",
+    "cryptography==50.0.0",
+    "redis==5.3.1",
+    "httpx==0.28.1",
+    "python-multipart==0.0.32",
+    "authlib==1.7.2",
+    "itsdangerous==2.2.0",
+    "arq==0.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "aiosqlite==0.22.1",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["api/tests"]
+pythonpath = ["api"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
