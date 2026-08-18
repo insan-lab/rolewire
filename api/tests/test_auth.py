@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import pytest
 from httpx import AsyncClient
 
 from tests.conftest import auth_headers
-
 
 
 async def test_signup_creates_tenant_and_returns_tokens(client: AsyncClient) -> None:

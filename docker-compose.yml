@@ -1,0 +1,95 @@
+# Dev compose. Secrets are injected by the shell (1Password: `op run -- docker compose up`),
+# never committed. See .env.example for the full variable list.
+#
+# Production splits this into docker-compose.yml + docker-compose.override.prod.yml, with
+# postgres/redis moved to managed instances.
+
+name: rolewire
+
+services:
+  api:
+    build: ./api
+    command:
+      - sh
+      - -c
+      - "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"
+    environment:
+      # Migrations run as the schema owner; the app itself is RLS-constrained (see api/app/core/db.py).
+      DATABASE_URL: postgresql+asyncpg://rolewire_app:${POSTGRES_APP_PASSWORD}@postgres:5432/rolewire
+      REDIS_URL: redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  worker:
+    build: ./api
+    command: ["arq", "app.worker.WorkerSettings"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://rolewire_app:${POSTGRES_APP_PASSWORD}@postgres:5432/rolewire
+      REDIS_URL: redis://redis:6379/0
+    env_file:
+      - .env
+    depends_on:
+      api:
+        condition: service_started
+      redis:
+        condition: service_healthy
+
+  # The Next.js admin panel is not implemented yet; uncomment once ./admin exists.
+  # admin:
+  #   build: ./admin
+  #   env_file: .env
+  #   depends_on:
+  #     - api
+  #   expose:
+  #     - "3000"
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: rolewire
+      POSTGRES_USER: rolewire
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_APP_PASSWORD: ${POSTGRES_APP_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rolewire -d rolewire"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+
+volumes:
+  pgdata:
+  redisdata:

@@ -22,8 +22,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from alembic import op
 
+from alembic import op
 from app.core.db import Base
 from app.models import TENANT_SCOPED_TABLES
 

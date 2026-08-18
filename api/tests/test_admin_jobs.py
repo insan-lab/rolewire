@@ -57,7 +57,7 @@ async def test_select_questions_require_options(client: AsyncClient) -> None:
 async def test_duplicate_field_keys_are_rejected(client: AsyncClient) -> None:
     headers = await auth_headers(client, email="dupkeys@acmecorp.io")
     response = await client.post(
-        f"/v1/admin/jobs",
+        "/v1/admin/jobs",
         json={
             "title": "X",
             "questions": [
