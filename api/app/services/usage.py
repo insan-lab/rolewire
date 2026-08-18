@@ -14,6 +14,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.core.redis_client import get_redis
 from app.models import UsageEvent
 
@@ -33,6 +34,8 @@ async def record(tenant_id: UUID | str, event_type: str, quantity: float = 1) ->
     """Increment the rolling Redis counter; never raises on cache failure."""
     if event_type not in EVENT_TYPES:
         raise ValueError(f"unknown usage event_type '{event_type}'")
+    if not get_settings().redis_enabled:
+        return
     try:
         redis = get_redis()
         key = counter_key(tenant_id, event_type)

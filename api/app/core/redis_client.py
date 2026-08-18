@@ -26,6 +26,8 @@ async def close_redis() -> None:
 
 
 async def redis_health() -> dict[str, Any]:
+    if not get_settings().redis_enabled:
+        return {"ok": False, "disabled": True}
     try:
         pong = await get_redis().ping()
         return {"ok": bool(pong)}

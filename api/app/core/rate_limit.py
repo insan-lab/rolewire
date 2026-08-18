@@ -10,6 +10,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass
 
+from app.core.config import get_settings
 from app.core.redis_client import get_redis
 
 
@@ -39,6 +40,8 @@ def _local_hit(key: str, limit: int, window_seconds: int) -> RateLimitResult:
 async def hit(key: str, *, limit: int, window_seconds: int) -> RateLimitResult:
     """Register one request against ``key`` and report whether it is allowed."""
     namespaced = f"rl:{key}"
+    if not get_settings().redis_enabled:
+        return _local_hit(namespaced, limit, window_seconds)
     try:
         redis = get_redis()
         pipe = redis.pipeline()

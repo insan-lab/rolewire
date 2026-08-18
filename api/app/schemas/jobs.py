@@ -37,16 +37,17 @@ class JobQuestionIn(BaseModel):
         return self
 
 
+def _ensure_unique_field_keys(value: list[JobQuestionIn]) -> list[JobQuestionIn]:
+    keys = [question.field_key for question in value]
+    if len(set(keys)) != len(keys):
+        raise ValueError("field_key values must be unique within a job")
+    return value
+
+
 class JobQuestionsReplace(BaseModel):
     questions: list[JobQuestionIn]
 
-    @field_validator("questions")
-    @classmethod
-    def _unique_field_keys(cls, value: list[JobQuestionIn]) -> list[JobQuestionIn]:
-        keys = [question.field_key for question in value]
-        if len(set(keys)) != len(keys):
-            raise ValueError("field_key values must be unique within a job")
-        return value
+    _unique_keys = field_validator("questions")(_ensure_unique_field_keys)
 
 
 class JobQuestionOut(ORMModel):
@@ -71,6 +72,8 @@ class JobCreate(BaseModel):
     ats_webhook_url: str | None = None
     opencats_sync: bool = False
     questions: list[JobQuestionIn] = Field(default_factory=list)
+
+    _unique_keys = field_validator("questions")(_ensure_unique_field_keys)
 
     @model_validator(mode="after")
     def _storage_config_matches_target(self) -> JobCreate:

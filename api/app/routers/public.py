@@ -253,7 +253,7 @@ async def relay_upload(
     content = await file.read(max_bytes + 1)
     if len(content) > max_bytes:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
             detail=f"file exceeds the {max_bytes} byte limit for this destination",
         )
 
@@ -304,7 +304,7 @@ async def apply(
         cleaned = validate_answers(list(job.questions), payload.answers)
     except AnswerValidationError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail={"message": "answer validation failed", "errors": exc.errors},
         ) from exc
 

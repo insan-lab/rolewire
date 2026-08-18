@@ -9,7 +9,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,6 +29,9 @@ class Settings(BaseSettings):
 
     # --- Redis ------------------------------------------------------------
     redis_url: str = "redis://localhost:6379/0"
+    # Test/single-node escape hatch: skips Redis entirely and uses the in-process rate-limit
+    # fallback. Never enable in prod — limits would then be per-worker instead of global.
+    redis_enabled: bool = True
 
     # --- Auth -------------------------------------------------------------
     jwt_secret: str = "dev-insecure-change-me"
@@ -95,6 +98,21 @@ class Settings(BaseSettings):
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
         return value
+
+    @model_validator(mode="after")
+    def _prod_requires_real_secrets(self) -> Settings:
+        if self.environment != "prod":
+            return self
+        # HS256 keys shorter than the hash output weaken the signature (RFC 7518 §3.2).
+        if len(self.jwt_secret) < 32 or self.jwt_secret.startswith("dev-"):
+            raise ValueError("jwt_secret must be a random value of at least 32 characters in prod")
+        if not self.encryption_key:
+            raise ValueError("encryption_key is required in prod")
+        if self.ip_hash_salt.startswith("dev-"):
+            raise ValueError("ip_hash_salt must be set in prod")
+        if not self.redis_enabled:
+            raise ValueError("redis_enabled must stay true in prod (shared rate limits/queue)")
+        return self
 
     @property
     def is_prod(self) -> bool:

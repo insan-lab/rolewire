@@ -47,6 +47,8 @@ async def close_pool() -> None:
 
 async def enqueue(task: str, *args: Any, **kwargs: Any) -> str | None:
     """Enqueue a worker task. Returns the job id, or None if the queue was unreachable."""
+    if not get_settings().redis_enabled:
+        return None
     try:
         pool = await get_pool()
         job = await pool.enqueue_job(task, *args, **kwargs)
