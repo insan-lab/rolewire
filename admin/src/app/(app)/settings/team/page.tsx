@@ -25,9 +25,9 @@ export default async function TeamSettingsPage() {
           </thead>
           <tbody>
             <Tr>
-              <Td className="font-medium text-zinc-900">{user.email}</Td>
-              <Td className="capitalize text-zinc-600">{user.role}</Td>
-              <Td className="text-zinc-600">{formatDate(user.created_at)}</Td>
+              <Td className="font-medium text-paper">{user.email}</Td>
+              <Td className="capitalize text-dim">{user.role}</Td>
+              <Td className="text-dim">{formatDate(user.created_at)}</Td>
             </Tr>
           </tbody>
         </Table>

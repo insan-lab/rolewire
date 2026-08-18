@@ -24,8 +24,8 @@ export function Progress({
   return (
     <div className={cn("space-y-1.5", className)}>
       <div className="flex items-baseline justify-between gap-2 text-sm">
-        <span className="text-zinc-700">{label}</span>
-        <span className={cn("text-xs", overQuota ? "font-medium text-amber-700" : "text-zinc-500")}>
+        <span className="text-paper">{label}</span>
+        <span className={cn("font-mono text-xs", overQuota ? "font-medium text-amber-400" : "text-dim")}>
           {valueLabel}
         </span>
       </div>
@@ -35,10 +35,10 @@ export function Progress({
         aria-valuenow={max > 0 ? percent : undefined}
         aria-valuemin={0}
         aria-valuemax={100}
-        className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-200"
+        className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--line-soft)]"
       >
         <div
-          className={cn("h-full rounded-full", overQuota ? "bg-amber-500" : "bg-accent-500")}
+          className={cn("h-full rounded-full transition-all", overQuota ? "bg-amber-400" : "bg-copper-bright")}
           style={{ width: `${max > 0 ? percent : 0}%` }}
         />
       </div>

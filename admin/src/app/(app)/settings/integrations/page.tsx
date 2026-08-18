@@ -47,17 +47,17 @@ export default async function IntegrationsSettingsPage() {
               {jobs.items.map((job) => (
                 <Tr key={job.id}>
                   <Td>
-                    <Link href={`/jobs/${job.id}`} className="font-medium text-zinc-900 hover:text-accent-700 hover:underline">
+                    <Link href={`/jobs/${job.id}`} className="font-medium text-paper hover:text-copper-bright hover:underline">
                       {job.title}
                     </Link>
                   </Td>
                   <Td>
                     <JobStatusBadge status={job.status} />
                   </Td>
-                  <Td className="max-w-xs truncate text-xs text-zinc-600">
+                  <Td className="max-w-xs truncate font-mono text-xs text-dim">
                     {job.ats_webhook_url ?? "Not set"}
                   </Td>
-                  <Td className="text-zinc-600">{job.opencats_sync ? "On" : "Off"}</Td>
+                  <Td className="text-dim">{job.opencats_sync ? "On" : "Off"}</Td>
                 </Tr>
               ))}
             </tbody>

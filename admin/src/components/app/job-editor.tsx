@@ -194,8 +194,8 @@ export function JobEditor({ job, storageConfigs }: { job: Job; storageConfigs: S
                 <label
                   key={target}
                   className={cn(
-                    "flex cursor-pointer items-start gap-2.5 rounded-md border p-3 text-sm",
-                    storageTarget === target ? "border-accent-400 bg-accent-50/50" : "border-zinc-200",
+                    "flex cursor-pointer items-start gap-2.5 rounded-md border p-3 text-sm transition-colors",
+                    storageTarget === target ? "border-[var(--copper)] bg-[rgba(192,122,62,0.12)]" : "border-[var(--line-soft)] bg-[var(--ink-soft)]",
                     !available && "opacity-60",
                   )}
                 >
@@ -212,8 +212,8 @@ export function JobEditor({ job, storageConfigs }: { job: Job; storageConfigs: S
                     className="mt-0.5"
                   />
                   <span>
-                    <span className="font-medium text-zinc-900">{STORAGE_TARGET_LABELS[target]}</span>
-                    <span className="block text-xs text-zinc-500">
+                    <span className="font-medium text-paper">{STORAGE_TARGET_LABELS[target]}</span>
+                    <span className="block text-xs text-dim">
                       {available ? "" : "Connect one in Settings → Storage first."}
                     </span>
                   </span>
@@ -272,9 +272,9 @@ export function JobEditor({ job, storageConfigs }: { job: Job; storageConfigs: S
           </Field>
           <div className="flex items-center gap-2.5">
             <Switch id="edit-opencats" checked={opencatsSync} onCheckedChange={setOpencatsSync} label="Sync to hosted OpenCATS" />
-            <label htmlFor="edit-opencats" className="text-sm text-zinc-700">
+            <label htmlFor="edit-opencats" className="text-sm text-paper">
               Sync to hosted OpenCATS
-              <span className="block text-xs text-zinc-500">
+              <span className="block text-xs text-dim">
                 Only takes effect once hosted OpenCATS is available for this workspace.
               </span>
             </label>

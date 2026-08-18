@@ -44,7 +44,7 @@ export default async function AccountSettingsPage({
           <CardHeader title="Email" />
           <CardBody className="space-y-2">
             <div className="flex items-center gap-2">
-              <p className="text-sm text-zinc-900">{user.email}</p>
+              <p className="text-sm font-medium text-paper">{user.email}</p>
               {user.email_verified ? (
                 <Badge tone="success">
                   <CheckCircle2 className="size-3" /> Verified
@@ -78,22 +78,22 @@ export default async function AccountSettingsPage({
             title="Linked sign-in providers"
             description="Add more ways to sign in, or remove ones you no longer use."
           />
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--line-soft)]">
             {OAUTH_PROVIDERS.map((provider) => {
               const isLinked = linkedSet.has(provider);
               const onlyLoginMethod = isLinked && !user.has_password && linkedSet.size === 1;
               return (
                 <li key={provider} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>
-                    <p className="text-sm font-medium text-zinc-900">{LABELS[provider]}</p>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-sm font-medium text-paper">{LABELS[provider]}</p>
+                    <p className="text-xs text-dim">
                       {isLinked ? "Linked" : "Not linked"}
                       {onlyLoginMethod ? " · your only sign-in method" : ""}
                     </p>
                   </div>
                   {isLinked ? (
                     onlyLoginMethod ? (
-                      <span className="text-xs text-zinc-400">Can&rsquo;t unlink</span>
+                      <span className="text-xs text-dim opacity-50">Can&rsquo;t unlink</span>
                     ) : (
                       <UnlinkProviderButton provider={provider} label={LABELS[provider]} />
                     )
@@ -101,7 +101,7 @@ export default async function AccountSettingsPage({
                     <form method="POST" action={`/api/auth/oauth/${provider}/link`}>
                       <button
                         type="submit"
-                        className="h-8 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
+                        className="h-8 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] px-2.5 text-sm text-dim transition-colors hover:text-paper"
                       >
                         Link
                       </button>

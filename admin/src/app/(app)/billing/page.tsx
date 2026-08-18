@@ -97,10 +97,10 @@ export default async function BillingPage({
                 <tbody>
                   {billing.invoices.map((invoice) => (
                     <Tr key={invoice.id}>
-                      <Td className="text-zinc-600">{formatDate(invoice.created_at)}</Td>
-                      <Td className="capitalize text-zinc-600">{invoice.provider}</Td>
-                      <Td className="capitalize text-zinc-600">{invoice.status}</Td>
-                      <Td className="text-right font-medium text-zinc-900">
+                      <Td className="text-dim">{formatDate(invoice.created_at)}</Td>
+                      <Td className="capitalize text-dim">{invoice.provider}</Td>
+                      <Td className="capitalize text-dim">{invoice.status}</Td>
+                      <Td className="text-right font-medium text-paper">
                         {formatMoney(invoice.amount, invoice.currency)}
                       </Td>
                     </Tr>
@@ -115,19 +115,19 @@ export default async function BillingPage({
           <CardHeader title="Plan" actions={<TenantStatusBadge status={billing.tenant_status} />} />
           <CardBody className="space-y-3 text-sm">
             <div>
-              <p className="font-medium capitalize text-zinc-900">{billing.plan?.name ?? "No plan yet"}</p>
-              <p className="text-xs text-zinc-500">
+              <p className="font-medium capitalize text-paper">{billing.plan?.name ?? "No plan yet"}</p>
+              <p className="text-xs text-dim">
                 {billing.subscription
                   ? `${billing.subscription.billing_cycle} · ${billing.subscription.status}`
                   : "No active subscription"}
               </p>
             </div>
             {billing.subscription?.current_period_end ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-dim">
                 Renews {formatDate(billing.subscription.current_period_end)}
               </p>
             ) : null}
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-dim">
               {billing.payment_provider
                 ? `Billed through ${billing.payment_provider}`
                 : "No payment method connected"}

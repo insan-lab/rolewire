@@ -59,12 +59,12 @@ export function StorageSettings({ configs }: { configs: StorageConfig[] }) {
             body="Connect S3, Google Drive or Telegram below, then pick it as a job's storage target."
           />
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--line-soft)]">
             {configs.map((config) => (
               <li key={config.id} className="flex items-center justify-between gap-3 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-zinc-900">{config.name}</p>
-                  <p className="truncate text-xs text-zinc-500">
+                  <p className="truncate text-sm font-medium text-paper">{config.name}</p>
+                  <p className="truncate text-xs text-dim">
                     {STORAGE_TARGET_LABELS[config.type]} · {configSummary(config)} · connected{" "}
                     {formatDate(config.created_at)}
                   </p>
@@ -73,7 +73,7 @@ export function StorageSettings({ configs }: { configs: StorageConfig[] }) {
                   type="button"
                   onClick={() => setPendingDelete(config)}
                   aria-label={`Remove ${config.name}`}
-                  className="shrink-0 rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+                  className="shrink-0 rounded p-1.5 text-dim transition-colors hover:bg-red-500/10 hover:text-red-400"
                 >
                   <Trash2 className="size-4" />
                 </button>
@@ -85,17 +85,17 @@ export function StorageSettings({ configs }: { configs: StorageConfig[] }) {
 
       <Card>
         <CardHeader title="Connect a destination" />
-        <div className="flex gap-1 border-b border-zinc-200 px-4 pt-3">
+        <div className="flex gap-1 border-b border-[var(--line-soft)] px-4 pt-3">
           {TYPES.map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => setActiveType(type)}
               className={cn(
-                "rounded-t-md px-3 py-1.5 text-sm font-medium",
+                "rounded-t-md px-3 py-1.5 text-sm font-medium transition-colors",
                 activeType === type
-                  ? "border-x border-t border-zinc-200 bg-white text-zinc-900"
-                  : "text-zinc-500 hover:text-zinc-800",
+                  ? "border-x border-t border-[var(--line-soft)] bg-[var(--ink-soft)] text-paper"
+                  : "text-dim hover:text-paper",
               )}
             >
               {STORAGE_TARGET_LABELS[type]}

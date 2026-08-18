@@ -243,15 +243,18 @@ function QuestionRow({
   return (
     <li
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={`rounded-lg border bg-white p-3 ${
-        messages.length ? "border-red-300" : "border-zinc-200"
-      } ${isDragging ? "shadow-overlay" : "shadow-card"}`}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        background: "var(--ink-soft)",
+        borderColor: messages.length ? "#f87171" : "var(--line-soft)",
+      }}
+      className={`rounded-lg border p-3 ${isDragging ? "shadow-overlay" : "shadow-card"}`}
     >
       <div className="flex items-start gap-2">
         <button
           type="button"
-          className="mt-6 cursor-grab rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+          className="mt-6 cursor-grab rounded p-1 text-dim transition-colors hover:bg-[var(--ink)] hover:text-paper"
           aria-label={`Reorder question ${index + 1}`}
           {...attributes}
           {...listeners}
@@ -318,7 +321,7 @@ function QuestionRow({
               onCheckedChange={(required) => onChange({ required })}
               label={`Question ${index + 1} required`}
             />
-            <Label htmlFor={`${fieldId}-required`} className="text-xs text-zinc-500">
+            <Label htmlFor={`${fieldId}-required`} className="text-xs text-dim">
               Required
             </Label>
           </div>
@@ -326,7 +329,7 @@ function QuestionRow({
             type="button"
             onClick={onRemove}
             aria-label={`Remove question ${index + 1}`}
-            className="rounded p-1.5 text-zinc-400 hover:bg-red-50 hover:text-red-600"
+            className="rounded p-1.5 text-dim transition-colors hover:bg-red-500/10 hover:text-red-400"
           >
             <Trash2 className="size-4" />
           </button>
@@ -350,9 +353,9 @@ function QuestionRow({
                   .filter(Boolean),
               });
             }}
-            className="w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm"
+            className="w-full rounded-md border border-[var(--line-soft)] bg-[var(--ink)] px-2.5 py-1.5 text-sm text-paper placeholder:text-dim"
           />
-          <p className="text-xs text-zinc-500">One choice per line.</p>
+          <p className="font-mono text-xs text-dim">One choice per line.</p>
         </div>
       ) : null}
 

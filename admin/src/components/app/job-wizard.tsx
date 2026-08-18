@@ -101,8 +101,7 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
   }
 
   return (
-    <div className="space-y-5">
-      <ol className="flex flex-wrap items-center gap-1 text-sm">
+    <div className="space-y-5">      <ol className="flex flex-wrap items-center gap-1 text-sm">
         {STEPS.map((label, index) => (
           <li key={label} className="flex items-center gap-1">
             <button
@@ -110,23 +109,27 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
               onClick={() => index < step && setStep(index)}
               disabled={index > step}
               className={cn(
-                "flex items-center gap-1.5 rounded-md px-2 py-1",
-                index === step && "bg-zinc-900 font-medium text-white",
-                index < step && "text-accent-700 hover:bg-accent-50",
-                index > step && "cursor-default text-zinc-400",
+                "flex items-center gap-1.5 rounded-md px-2 py-1 transition-colors",
+                index === step && "bg-copper-bright font-medium text-ink",
+                index < step && "text-copper-bright hover:bg-[var(--ink-soft)]",
+                index > step && "cursor-default text-dim opacity-50",
               )}
             >
               <span
                 className={cn(
                   "grid size-4 place-items-center rounded-full text-[0.625rem]",
-                  index < step ? "bg-emerald-600 text-white" : index === step ? "bg-white/20" : "bg-zinc-200",
+                  index < step
+                    ? "bg-[var(--signal)] text-ink font-bold"
+                    : index === step
+                      ? "bg-ink/30 text-ink"
+                      : "bg-[var(--line-soft)] text-dim",
                 )}
               >
                 {index < step ? <Check className="size-3" /> : index + 1}
               </span>
               {label}
             </button>
-            {index < STEPS.length - 1 ? <span className="text-zinc-300">›</span> : null}
+            {index < STEPS.length - 1 ? <span className="font-mono text-dim">›</span> : null}
           </li>
         ))}
       </ol>
@@ -224,8 +227,8 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
                   <label
                     key={target}
                     className={cn(
-                      "flex cursor-pointer items-start gap-2.5 rounded-md border p-3 text-sm",
-                      storageTarget === target ? "border-accent-400 bg-accent-50/50" : "border-zinc-200",
+                      "flex cursor-pointer items-start gap-2.5 rounded-md border p-3 text-sm transition-colors",
+                      storageTarget === target ? "border-[var(--copper)] bg-[rgba(192,122,62,0.12)]" : "border-[var(--line-soft)] bg-[var(--ink-soft)]",
                       !available && "opacity-60",
                     )}
                   >
@@ -242,8 +245,8 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
                       className="mt-0.5"
                     />
                     <span>
-                      <span className="font-medium text-zinc-900">{STORAGE_TARGET_LABELS[target]}</span>
-                      <span className="block text-xs text-zinc-500">
+                      <span className="font-medium text-paper">{STORAGE_TARGET_LABELS[target]}</span>
+                      <span className="block text-xs text-dim">
                         {target === "hosted"
                           ? "Counts against your plan's hosted storage quota."
                           : available
@@ -303,17 +306,17 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
             </dl>
 
             <div>
-              <p className="mb-1.5 font-mono text-xs text-zinc-500">
+              <p className="mb-1.5 font-mono text-xs text-dim">
                 GET /v1/public/jobs/{"{job_id}"}
               </p>
               <CodeBlock code={previewJson(details, questions)} label="preview" />
-              <p className="mt-1.5 text-xs text-zinc-500">
+              <p className="mt-1.5 text-xs text-dim">
                 <code className="font-mono">id</code>, <code className="font-mono">created_at</code> and{" "}
                 <code className="font-mono">company</code> are filled in by the API.
               </p>
             </div>
 
-            <label className="flex items-start gap-2.5 rounded-md border border-zinc-200 p-3 text-sm">
+            <label className="flex items-start gap-2.5 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] p-3 text-sm">
               <input
                 type="checkbox"
                 checked={publishNow}
@@ -321,8 +324,8 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
                 className="mt-0.5"
               />
               <span>
-                <span className="font-medium text-zinc-900">Publish immediately</span>
-                <span className="block text-xs text-zinc-500">
+                <span className="font-medium text-paper">Publish immediately</span>
+                <span className="block text-xs text-dim">
                   Published jobs are readable by anyone with the job id and accept applications right
                   away. Leave unchecked to save a draft.
                 </span>
@@ -344,7 +347,7 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
               Back
             </Button>
           ) : (
-            <Link href="/jobs" className="text-sm text-zinc-500 hover:text-zinc-800">
+            <Link href="/jobs" className="text-sm text-dim transition-colors hover:text-paper">
               Cancel
             </Link>
           )}
@@ -384,7 +387,7 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
       </div>
 
       {step === 1 && questionIssues.length > 0 ? (
-        <p className="text-right text-xs text-red-600">
+        <p className="text-right text-xs text-red-500">
           Fix {questionIssues.length} problem{questionIssues.length === 1 ? "" : "s"} above to continue.
         </p>
       ) : null}
@@ -395,11 +398,12 @@ export function JobWizard({ storageConfigs }: { storageConfigs: StorageConfig[] 
 function Summary({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs text-zinc-500">{label}</dt>
-      <dd className="font-medium text-zinc-900">{value || "—"}</dd>
+      <dt className="text-xs text-dim">{label}</dt>
+      <dd className="font-medium text-paper">{value || "—"}</dd>
     </div>
   );
 }
+
 
 /** Mirrors the PublicJob schema so the preview matches the real response field for field. */
 function previewJson(details: Details, questions: DraftQuestion[]): string {

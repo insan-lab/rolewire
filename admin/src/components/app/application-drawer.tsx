@@ -41,7 +41,7 @@ export function ApplicationDrawer({
           <ApplicationStatusBadge status={application.status} />
           <Link
             href={`/applications/${application.id}`}
-            className="inline-flex items-center gap-1 text-xs font-medium text-accent-700 hover:underline"
+            className="inline-flex items-center gap-1 text-xs font-medium text-copper-bright hover:underline"
           >
             Open full page <ExternalLink className="size-3.5" />
           </Link>
@@ -56,31 +56,31 @@ export function ApplicationDrawer({
 
         {application.applicant_email ? (
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Email</p>
-            <p className="text-sm text-zinc-900">{application.applicant_email}</p>
+            <p className="font-mono text-xs font-medium uppercase tracking-wide text-dim">Email</p>
+            <p className="text-sm text-paper">{application.applicant_email}</p>
           </div>
         ) : null}
 
         <div>
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500">Résumé</p>
+          <p className="mb-1.5 font-mono text-xs font-medium uppercase tracking-wide text-dim">Résumé</p>
           {application.resume_ref ? (
-            <code className="block break-all rounded-md bg-zinc-100 px-2.5 py-1.5 text-xs text-zinc-700">
+            <code className="block break-all rounded-md border border-[var(--line-soft)] bg-[var(--ink)] px-2.5 py-1.5 font-mono text-xs text-paper">
               {application.resume_ref}
             </code>
           ) : (
-            <p className="text-sm text-zinc-500">No file was attached to this application.</p>
+            <p className="text-sm text-dim">No file was attached to this application.</p>
           )}
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-dim">
             A direct download link is not available yet — this points at the file inside the job&rsquo;s
             configured storage.
           </p>
         </div>
 
-        <dl className="divide-y divide-zinc-100 rounded-md border border-zinc-200">
+        <dl className="divide-y divide-[var(--line-soft)] rounded-md border border-[var(--line-soft)]">
           {answers.map(([key, value]) => (
             <div key={key} className="px-3 py-2">
-              <dt className="text-xs text-zinc-500">{labelFor(key)}</dt>
-              <dd className="text-sm text-zinc-900">{formatAnswer(value)}</dd>
+              <dt className="text-xs text-dim">{labelFor(key)}</dt>
+              <dd className="text-sm text-paper">{formatAnswer(value)}</dd>
             </div>
           ))}
         </dl>
