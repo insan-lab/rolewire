@@ -16,7 +16,7 @@ Full design: [`docs/spec.md`](docs/spec.md). This README covers what is built an
 | Payments: Paddle + UddoktaPay (checkout, webhooks, renewal emulation) | implemented |
 | Brevo transactional email + delivery webhook | implemented |
 | Docker Compose, Nginx, least-privilege Postgres role | implemented |
-| Next.js admin panel (`admin/`) | **not started** |
+| Next.js admin panel (`admin/`), containerized | implemented |
 | Hosted OpenCATS provisioning | out of scope for v0.1 (§13); `ats_webhook_url` forwarding ships instead |
 
 ## Quick start

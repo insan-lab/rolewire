@@ -43,14 +43,24 @@ services:
       redis:
         condition: service_healthy
 
-  # The Next.js admin panel is not implemented yet; uncomment once ./admin exists.
-  # admin:
-  #   build: ./admin
-  #   env_file: .env
-  #   depends_on:
-  #     - api
-  #   expose:
-  #     - "3000"
+  admin:
+    build:
+      context: ./admin
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_PADDLE_CLIENT_TOKEN: ${NEXT_PUBLIC_PADDLE_CLIENT_TOKEN:-}
+        NEXT_PUBLIC_PADDLE_ENVIRONMENT: ${NEXT_PUBLIC_PADDLE_ENVIRONMENT:-sandbox}
+        NEXT_PUBLIC_SUPPORT_EMAIL: ${NEXT_PUBLIC_SUPPORT_EMAIL:-support@rolewire.io}
+    environment:
+      # Server-to-server: stays on the internal Docker network (frontend spec §9), never the
+      # browser-facing NEXT_PUBLIC_API_URL baked into the client bundle above.
+      API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_started
+    expose:
+      - "3000"
 
   postgres:
     image: postgres:16
@@ -87,6 +97,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - api
+      - admin
     ports:
       - "80:80"
 
