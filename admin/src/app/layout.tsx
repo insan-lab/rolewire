@@ -12,9 +12,9 @@ import "./globals.css";
  */
 const fraunces = Fraunces({
   subsets: ["latin"],
+  // Variable font — axes require weight to be absent (next/font rule).
+  // Weight and style are controlled via CSS font-weight/font-style instead.
   axes: ["opsz", "SOFT", "WONK"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
   variable: "--font-display",
   display: "swap",
 });
