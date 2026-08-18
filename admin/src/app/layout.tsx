@@ -1,7 +1,37 @@
 import type { Metadata, Viewport } from "next";
+import { Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
 
 import { Providers } from "./providers";
 import "./globals.css";
+
+/**
+ * Design spec fonts (design.md):
+ *   Display / headline  → Fraunces (editorial serif)
+ *   Body / UI           → Inter (400, 500, 600)
+ *   Mono / data / brand → IBM Plex Mono (400, 500)
+ */
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT", "WONK"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -19,19 +49,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#18181b",
+  themeColor: "#0c0f0d",
   width: "device-width",
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      {/*
-        No webfont: the UI uses the platform sans stack (see tailwind.config.ts). That keeps the
-        Docker build hermetic — no font download at build time — and matches spec §7's "single
-        well-set system/Inter-class sans".
-      */}
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${inter.variable} ${ibmPlexMono.variable}`}
+    >
       <body className="min-h-dvh">
         <a href="#main" className="skip-link">
           Skip to content

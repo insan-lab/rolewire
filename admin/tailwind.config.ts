@@ -1,9 +1,9 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Palette per frontend spec §7: cool neutral (zinc) base with a single accent reserved for
- * primary actions and active/published status. The accent is a slightly desaturated cool blue —
- * calm enough for an all-day ops tool, and deliberately not the stock indigo/violet default.
+ * Palette per frontend spec §7 + design.md:
+ * - `accent-*`: cool-blue scale for the authenticated app shell (unchanged)
+ * - `copper*`, `signal`, `ink`, `paper`, `line*`: design.md brand tokens backed by CSS vars
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -22,10 +22,30 @@ const config: Config = {
           800: "#213c8a",
           900: "#20376e",
         },
+        // ── Design-token colours (design.md) — backed by CSS custom properties ──
+        ink: {
+          DEFAULT: "var(--ink)",
+          soft: "var(--ink-soft)",
+        },
+        paper: "var(--paper)",
+        line: {
+          DEFAULT: "var(--line)",
+          soft: "var(--line-soft)",
+        },
+        copper: {
+          DEFAULT: "var(--copper)",
+          bright: "var(--copper-bright)",
+        },
+        signal: "var(--signal)",
+        dim: "var(--text-dim)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        // Display / editorial serif (Fraunces) — headlines
+        display: ["var(--font-display)", "Georgia", "serif"],
+        // Body / UI (Inter) — everything a person reads or clicks
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Mono / data / brand (IBM Plex Mono) — code panels, eyebrow, brand mark
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       fontSize: {
         // Tables run dense (§7); 13px is the workhorse size for data rows.

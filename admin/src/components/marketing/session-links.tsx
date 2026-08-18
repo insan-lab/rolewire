@@ -27,7 +27,8 @@ export function SessionLinks() {
       <div className="flex items-center gap-2 text-sm">
         <Link
           href="/dashboard"
-          className="rounded-md bg-zinc-900 px-3 py-1.5 font-medium text-white hover:bg-zinc-800"
+          className="rounded-md px-3 py-1.5 font-medium transition-colors hover:opacity-90"
+          style={{ backgroundColor: "var(--copper-bright)", color: "var(--ink)" }}
         >
           Go to dashboard
         </Link>
@@ -37,12 +38,16 @@ export function SessionLinks() {
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <Link href="/login" className="px-2 py-1.5 text-zinc-600 hover:text-zinc-900">
+      <Link
+        href="/login"
+        className="px-2 py-1.5 text-dim transition-colors hover:text-paper"
+      >
         Log in
       </Link>
       <Link
         href="/signup"
-        className="rounded-md bg-zinc-900 px-3 py-1.5 font-medium text-white hover:bg-zinc-800"
+        className="rounded-md px-3 py-1.5 font-medium transition-colors hover:opacity-90"
+        style={{ backgroundColor: "var(--copper-bright)", color: "var(--ink)" }}
       >
         Start free
       </Link>

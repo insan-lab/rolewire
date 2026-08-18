@@ -13,20 +13,23 @@ import { SUPPORT_EMAIL } from "@/lib/env";
  */
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-white">
-      <header className="sticky top-0 z-30 border-b border-zinc-200 bg-white/90 backdrop-blur">
+    <div className="flex min-h-dvh flex-col bg-ink">
+      <header
+        className="sticky top-0 z-30 border-b border-line-soft bg-ink/90 backdrop-blur"
+        style={{ borderColor: "var(--line-soft)" }}
+      >
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-6 px-5">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight text-zinc-900">
+          <Link href="/" className="flex items-center gap-2 text-paper">
             <Wordmark />
           </Link>
-          <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-zinc-600 md:flex">
-            <Link href="/pricing" className="hover:text-zinc-900">
+          <nav aria-label="Main" className="hidden items-center gap-6 text-sm text-dim md:flex">
+            <Link href="/pricing" className="transition-colors hover:text-paper">
               Pricing
             </Link>
-            <Link href="/about" className="hover:text-zinc-900">
+            <Link href="/about" className="transition-colors hover:text-paper">
               About
             </Link>
-            <Link href="/contact" className="hover:text-zinc-900">
+            <Link href="/contact" className="transition-colors hover:text-paper">
               Contact
             </Link>
           </nav>
@@ -38,11 +41,11 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      <footer className="border-t border-zinc-200 bg-zinc-50">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm text-zinc-600 md:flex-row md:justify-between">
+      <footer className="border-t bg-ink-soft" style={{ borderColor: "var(--line-soft)" }}>
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 text-sm text-dim md:flex-row md:justify-between">
           <div className="space-y-2">
             <Wordmark />
-            <p className="max-w-xs text-xs text-zinc-500">
+            <p className="max-w-xs text-xs text-dim">
               Headless job posting and application collection. You keep the career page, the design
               and the files.
             </p>
@@ -62,7 +65,10 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             </FooterColumn>
           </div>
         </div>
-        <div className="border-t border-zinc-200 px-5 py-4 text-center text-xs text-zinc-400">
+        <div
+          className="border-t px-5 py-4 text-center text-xs text-dim"
+          style={{ borderColor: "var(--line-soft)" }}
+        >
           © {new Date().getFullYear()} Rolewire
         </div>
       </footer>
@@ -72,9 +78,10 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
 
 function Wordmark() {
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <span aria-hidden className="size-2.5 rounded-sm bg-accent-600" />
-      <span>Rolewire</span>
+    <span className="inline-flex items-center gap-1.5 font-mono text-sm font-medium tracking-tight">
+      {/* copper-bright signal dot — the brand's wire accent */}
+      <span aria-hidden className="size-2 rounded-full bg-copper-bright" />
+      <span className="text-paper">Rolewire</span>
     </span>
   );
 }
@@ -82,8 +89,12 @@ function Wordmark() {
 function FooterColumn({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-2">
-      <p className="font-semibold uppercase tracking-wide text-zinc-500">{title}</p>
-      <div className="flex flex-col gap-1.5 [&_a:hover]:text-zinc-900">{children}</div>
+      <p className="font-mono text-[0.65rem] font-medium uppercase tracking-widest text-dim">
+        {title}
+      </p>
+      <div className="flex flex-col gap-1.5 [&_a]:text-dim [&_a]:transition-colors [&_a:hover]:text-paper">
+        {children}
+      </div>
     </div>
   );
 }

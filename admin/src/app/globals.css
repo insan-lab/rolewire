@@ -2,44 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    color-scheme: light;
-  }
+/* ─── Design tokens (design.md) ──────────────────────────────────────────── */
 
+:root {
+  /* Dark mode — default */
+  color-scheme: dark;
+
+  --ink:          #0c0f0d;
+  --ink-soft:     #121512;
+  --paper:        #f3f1ea;
+  --line:         #2a2f2a;
+  --line-soft:    rgba(243, 241, 234, 0.12);
+  --copper:       #c07a3e;
+  --copper-bright:#e2934f;
+  --signal:       #7fae7a;
+  --text-dim:     #9a9d95;
+}
+
+[data-theme="light"] {
+  /* Light mode — same roles, contrast-safe values */
+  color-scheme: light;
+
+  --ink:          #faf8f2;
+  --ink-soft:     #eceadf;
+  --paper:        #17190f;
+  --line:         #d8d4c6;
+  --line-soft:    rgba(23, 25, 15, 0.10);
+  --copper:       #a8632c;
+  --copper-bright:#c9782f;
+  --signal:       #4d7548;
+  --text-dim:     #6b6e62;
+}
+
+/* ─── Base layer ──────────────────────────────────────────────────────────── */
+
+@layer base {
   html {
     -webkit-text-size-adjust: 100%;
   }
 
   body {
-    @apply bg-zinc-50 text-zinc-900 antialiased;
+    background-color: var(--ink);
+    color: var(--paper);
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    @apply antialiased;
     font-feature-settings: "cv11", "ss01";
     font-variant-numeric: tabular-nums;
   }
 
   /* Visible focus everywhere: this tool is used heavily by keyboard. */
   :focus-visible {
-    @apply outline-none ring-2 ring-accent-500 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-offset-2;
+    ring-color: var(--copper-bright);
+    ring-offset-color: var(--ink);
   }
 
   ::selection {
-    @apply bg-accent-100 text-accent-900;
+    background-color: var(--copper);
+    color: var(--paper);
   }
 }
+
+/* ─── Component layer ─────────────────────────────────────────────────────── */
 
 @layer components {
   /* Long-form marketing/job copy rendered from plain text or light markup. */
   .prose-plain {
-    @apply text-[0.9375rem] leading-relaxed text-zinc-600;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text-dim);
   }
 
   .prose-plain p + p {
-    @apply mt-4;
+    margin-top: 1rem;
   }
 }
 
+/* ─── Utility layer ───────────────────────────────────────────────────────── */
+
 @layer utilities {
   .skip-link {
-    @apply absolute left-4 top-4 z-50 -translate-y-16 rounded-md bg-zinc-900 px-3 py-2 text-sm text-white transition-transform focus:translate-y-0;
+    @apply absolute left-4 top-4 z-50 -translate-y-16 rounded-md px-3 py-2 text-sm transition-transform focus:translate-y-0;
+    background-color: var(--copper-bright);
+    color: var(--ink);
   }
 }
