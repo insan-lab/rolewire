@@ -53,21 +53,19 @@ export default async function JobApplicationsPage({
       <PageHeader
         title={`Applications · ${job.title}`}
         breadcrumb={
-          <Link href={`/jobs/${job.id}`} className="text-xs text-zinc-500 hover:text-zinc-800">
+          <Link href={`/jobs/${job.id}`} className="text-xs text-dim transition-colors hover:text-paper">
             ← Back to {job.title}
           </Link>
         }
       />
-      <Card>
-        <ApplicationsInbox
-          initialPage={page}
-          basePath={`/jobs/${job.id}/applications`}
-          jobId={job.id}
-          status={status}
-          offset={offset}
-          limit={status ? 100 : PAGE_SIZE}
-        />
-      </Card>
+      <ApplicationsInbox
+        initialPage={page}
+        basePath={`/jobs/${job.id}/applications`}
+        jobId={job.id}
+        status={status}
+        offset={offset}
+        limit={status ? 100 : PAGE_SIZE}
+      />
     </>
   );
 }

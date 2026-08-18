@@ -33,17 +33,15 @@ export default async function ApplicationsPage({
         title="Applications"
         description="Every submission across every job in this workspace. Updates automatically as new ones arrive."
       />
-      <Card>
-        <ApplicationsInbox
-          initialPage={page}
-          basePath="/applications"
-          jobId={jobId || undefined}
-          status={status}
-          offset={offset}
-          limit={status ? 100 : PAGE_SIZE}
-          jobsForFilter={jobs.items}
-        />
-      </Card>
+      <ApplicationsInbox
+        initialPage={page}
+        basePath="/applications"
+        jobId={jobId || undefined}
+        status={status}
+        offset={offset}
+        limit={status ? 100 : PAGE_SIZE}
+        jobsForFilter={jobs.items}
+      />
     </>
   );
 }

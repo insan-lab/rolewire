@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import { ApplicationDrawer } from "@/components/app/application-drawer";
 import { ApplicationStatusBadge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/surface";
+import { Card, EmptyState } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
 import { apiFetch } from "@/lib/api/browser";
 import type { Application, Job, JobQuestion, Page } from "@/lib/api/types";
@@ -119,56 +119,71 @@ export function ApplicationsInbox({
         ) : null}
       </div>
 
-      {items.length === 0 ? (
-        <EmptyState
-          icon={<Inbox className="size-6" />}
-          title={status ? `No ${status} applications` : "No applications yet"}
-          body="Applications arrive here within seconds of someone submitting your public form. This view refreshes automatically."
-        />
-      ) : (
-        <>
-          <Table caption="Applications">
-            <thead>
-              <tr>
-                <Th>Applicant</Th>
-                {jobsForFilter ? <Th>Job</Th> : null}
-                <Th>Status</Th>
-                <Th className="text-right">Received</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((application) => (
-                <Tr key={application.id} onClick={() => setOpenId(application.id)}>
-                  <Td className="font-medium text-paper">{applicantLabel(application)}</Td>
-                  {jobsForFilter ? (
-                    <Td className="text-dim">
-                      {jobsById.get(application.job_id)?.title ?? "Deleted job"}
-                    </Td>
-                  ) : null}
-                  <Td>
-                    <ApplicationStatusBadge status={application.status} />
-                  </Td>
-                  <Td className="text-right text-xs text-dim">
-                    {relativeTime(application.created_at)}
-                  </Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-          {status ? (
-            <p className="border-t border-[var(--line-soft)] px-3 py-2 font-mono text-xs text-dim">
-              Showing {items.length} {status} of {data.items.length} loaded.
-            </p>
-          ) : (
-            <Pagination
-              total={data.total}
-              limit={limit}
-              offset={offset}
-              buildHref={(nextOffset) => buildHref({ offset: nextOffset })}
-            />
-          )}
-        </>
-      )}
+      <Card>
+        {items.length === 0 ? (
+          <EmptyState
+            icon={<Inbox className="size-6" />}
+            title={status ? `No ${status} applications` : "No applications yet"}
+            body="Applications arrive here within seconds of someone submitting your public form. This view refreshes automatically."
+          />
+        ) : (
+          <>
+            <Table caption="Applications">
+              <thead>
+                <tr>
+                  <Th>Applicant</Th>
+                  {jobsForFilter ? <Th>Job</Th> : null}
+                  <Th>Status</Th>
+                  <Th className="text-right">Received</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((application) => {
+                  const label = applicantLabel(application);
+                  const showEmailSub = Boolean(
+                    application.applicant_email && label !== application.applicant_email,
+                  );
+                  return (
+                    <Tr key={application.id} onClick={() => setOpenId(application.id)}>
+                      <Td>
+                        <span className="font-medium text-paper transition-colors hover:text-copper-bright">
+                          {label}
+                        </span>
+                        {showEmailSub ? (
+                          <p className="font-mono text-xs text-dim">{application.applicant_email}</p>
+                        ) : null}
+                      </Td>
+                      {jobsForFilter ? (
+                        <Td className="text-dim">
+                          {jobsById.get(application.job_id)?.title ?? "Deleted job"}
+                        </Td>
+                      ) : null}
+                      <Td>
+                        <ApplicationStatusBadge status={application.status} />
+                      </Td>
+                      <Td className="text-right font-mono text-xs text-dim">
+                        {relativeTime(application.created_at)}
+                      </Td>
+                    </Tr>
+                  );
+                })}
+              </tbody>
+            </Table>
+            {status ? (
+              <p className="border-t border-[var(--line-soft)] px-3 py-2 font-mono text-xs text-dim">
+                Showing {items.length} {status} of {data.items.length} loaded.
+              </p>
+            ) : (
+              <Pagination
+                total={data.total}
+                limit={limit}
+                offset={offset}
+                buildHref={(nextOffset) => buildHref({ offset: nextOffset })}
+              />
+            )}
+          </>
+        )}
+      </Card>
 
       <ApplicationDrawer
         application={open}
