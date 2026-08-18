@@ -14,9 +14,10 @@ services:
     command:
       - sh
       - -c
-      - "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"
+      - "DATABASE_URL=postgresql+asyncpg://rolewire:${POSTGRES_PASSWORD}@postgres:5432/rolewire alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"
     environment:
-      # Migrations run as the schema owner; the app itself is RLS-constrained (see api/app/core/db.py).
+      # Migrations run as the schema owner (rolewire, via the command-level override above);
+      # the app itself connects as rolewire_app, which is RLS-constrained (see api/app/core/db.py).
       DATABASE_URL: postgresql+asyncpg://rolewire_app:${POSTGRES_APP_PASSWORD}@postgres:5432/rolewire
       REDIS_URL: redis://redis:6379/0
     env_file:
