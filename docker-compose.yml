@@ -8,7 +8,9 @@ name: rolewire
 
 services:
   api:
-    build: ./api
+    build:
+      context: ./api
+      network: host
     command:
       - sh
       - -c
@@ -24,13 +26,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    expose:
-      - "8000"
-    ports:
-      - "127.0.0.1:8000:8000"
 
   worker:
-    build: ./api
+    build:
+      context: ./api
+      network: host
     command: ["arq", "app.worker.WorkerSettings"]
     environment:
       DATABASE_URL: postgresql+asyncpg://rolewire_app:${POSTGRES_APP_PASSWORD}@postgres:5432/rolewire
@@ -46,6 +46,7 @@ services:
   admin:
     build:
       context: ./admin
+      network: host
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
         NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
@@ -59,8 +60,6 @@ services:
     depends_on:
       api:
         condition: service_started
-    expose:
-      - "3000"
 
   postgres:
     image: postgres:16
@@ -77,8 +76,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    ports:
-      - "127.0.0.1:5432:5432"
 
   redis:
     image: redis:7-alpine
@@ -99,7 +96,7 @@ services:
       - api
       - admin
     ports:
-      - "80:80"
+      - "9298:80"
 
 volumes:
   pgdata:
