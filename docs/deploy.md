@@ -12,18 +12,18 @@ guide.
 One Docker host runs six containers, all on Compose's default bridge network:
 
 ```
-                 ┌────────────────────────────────────────┐
+                 ┌──────────────────────────────────────────┐
  :443 (TLS edge) │                                          │
    ───────────►  │  nginx :80  ──┬─► admin (Next.js) :3000  │
-  (see §3)        │               └─► api (FastAPI) :8000   │
+  (see §3)       │               └──► api (FastAPI) :8000   │
                  │                        │                 │
                  │                        ▼                 │
-                 │  worker (arq)  ──►  postgres :5432        │
-                 │        │        ──►  redis :6379          │
-                 │        ▼                                  │
-                 │  (webhook delivery, receipt email,         │
-                 │   usage flush, renewal sweep — cron)        │
-                 └────────────────────────────────────────┘
+                 │  worker (arq)  ──►  postgres :5432       │
+                 │        │       ──►  redis :6379          │
+                 │        ▼                                 │
+                 │  (webhook delivery, receipt email,       │
+                 │   usage flush, renewal sweep — cron)     │
+                 └──────────────────────────────────────────┘
 ```
 
 Everything — marketing pages, login, dashboard, and the `/v1/*` API — is served from **one public
