@@ -7,10 +7,10 @@ All secrets are expected to be injected as environment variables at process star
 from __future__ import annotations
 
 from functools import lru_cache
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -48,7 +48,9 @@ class Settings(BaseSettings):
 
     # --- CORS -------------------------------------------------------------
     # Public endpoints are intentionally wide open (§12); admin is origin-locked.
-    admin_allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    admin_allowed_origins: Annotated[list[str], NoDecode] = Field(
+        default_factory=lambda: ["http://localhost:3000"]
+    )
 
     # --- Public API limits ------------------------------------------------
     public_apply_rate_limit: int = 1
