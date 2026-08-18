@@ -10,11 +10,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ApiError } from "@/lib/api/errors";
 import { api } from "@/lib/api/server";
 import type { OAuthStart } from "@/lib/api/types";
-import { isOAuthProvider } from "@/lib/env";
+import { getAppOrigin, isOAuthProvider } from "@/lib/env";
 import { OAUTH_INTENT_COOKIE, intentCookieOptions } from "@/lib/oauth";
 
 function back(req: NextRequest, error: string): NextResponse {
-  return NextResponse.redirect(new URL(`/settings/account?error=${error}`, req.nextUrl.origin), 303);
+  return NextResponse.redirect(new URL(`/settings/account?error=${error}`, getAppOrigin(req)), 303);
 }
 
 export async function POST(req: NextRequest, context: { params: Promise<{ provider: string }> }) {
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ provid
     return response;
   } catch (error) {
     if (error instanceof ApiError && error.isUnauthorized) {
-      return NextResponse.redirect(new URL("/login?reason=session_expired", req.nextUrl.origin), 303);
+      return NextResponse.redirect(new URL("/login?reason=session_expired", getAppOrigin(req)), 303);
     }
     if (error instanceof ApiError && error.status === 503) return back(req, "provider_not_configured");
     return back(req, "oauth_start_failed");

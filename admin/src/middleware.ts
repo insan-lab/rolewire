@@ -7,6 +7,7 @@
  */
 import { NextResponse, type NextRequest } from "next/server";
 
+import { getAppOrigin } from "@/lib/env";
 import type { TokenPair } from "@/lib/api/types";
 import {
   ACCESS_COOKIE,
@@ -60,11 +61,10 @@ async function exchangeRefreshToken(refreshPath: string, token: string): Promise
     return null;
   }
 }
-
+ 
 function loginRedirect(request: NextRequest, session: SessionConfig, reason: string): NextResponse {
-  const url = request.nextUrl.clone();
-  url.pathname = session.loginPath;
-  url.search = "";
+  const origin = getAppOrigin(request);
+  const url = new URL(session.loginPath, origin);
   url.searchParams.set("reason", reason);
   const next = `${request.nextUrl.pathname}${request.nextUrl.search}`;
   if (next && next !== session.defaultNext) url.searchParams.set("next", next);

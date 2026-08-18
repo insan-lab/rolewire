@@ -46,3 +46,30 @@ export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 export function isOAuthProvider(value: string): value is OAuthProvider {
   return (OAUTH_PROVIDERS as readonly string[]).includes(value);
 }
+
+/**
+ * Safely resolves the public origin of incoming server requests, handling reverse proxies,
+ * NEXT_PUBLIC_APP_URL, Host / X-Forwarded-Host headers, and avoiding internal 0.0.0.0 bind IPs.
+ */
+export function getAppOrigin(req?: { headers: { get: (name: string) => string | null }; nextUrl?: { protocol?: string; origin?: string } }): string {
+  if (req) {
+    const forwardedHost = req.headers.get("x-forwarded-host");
+    if (forwardedHost) {
+      const proto = req.headers.get("x-forwarded-proto") ?? "https";
+      return `${proto}://${forwardedHost}`.replace(/\/$/, "");
+    }
+    const host = req.headers.get("host");
+    if (host && !host.startsWith("0.0.0.0")) {
+      const proto = req.nextUrl?.protocol || "https";
+      return `${proto}://${host}`.replace(/\/$/, "");
+    }
+  }
+  if (APP_URL && !APP_URL.includes("0.0.0.0")) {
+    return APP_URL.replace(/\/$/, "");
+  }
+  if (req?.nextUrl?.origin) {
+    return req.nextUrl.origin.replace("0.0.0.0", "localhost").replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
+

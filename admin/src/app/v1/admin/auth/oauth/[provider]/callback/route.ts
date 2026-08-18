@@ -13,18 +13,19 @@ import { ApiError } from "@/lib/api/errors";
 import { request } from "@/lib/api/fetch";
 import { writeSession } from "@/lib/api/server";
 import type { TokenPair } from "@/lib/api/types";
-import { isOAuthProvider } from "@/lib/env";
+import { getAppOrigin, isOAuthProvider } from "@/lib/env";
 import { OAUTH_INTENT_COOKIE, readIntent } from "@/lib/oauth";
 
 export async function GET(req: NextRequest, context: { params: Promise<{ provider: string }> }) {
   const { provider } = await context.params;
   const url = req.nextUrl;
+  const origin = getAppOrigin(req);
   const intent = readIntent(req.cookies.get(OAUTH_INTENT_COOKIE)?.value);
 
   const failure = (params: Record<string, string>) => {
     const target = new URL(
       intent === "link" ? "/settings/account" : "/auth/oauth/callback",
-      url.origin,
+      origin,
     );
     for (const [key, value] of Object.entries(params)) target.searchParams.set(key, value);
     const response = NextResponse.redirect(target);
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ provide
     await writeSession(tokens);
     const target = new URL(
       intent === "link" ? `/settings/account?linked=${provider}` : "/dashboard",
-      url.origin,
+      origin,
     );
     const response = NextResponse.redirect(target);
     response.cookies.delete(OAUTH_INTENT_COOKIE);

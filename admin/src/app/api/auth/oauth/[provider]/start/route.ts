@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ApiError } from "@/lib/api/errors";
 import { request } from "@/lib/api/fetch";
 import type { OAuthStart } from "@/lib/api/types";
-import { isOAuthProvider } from "@/lib/env";
+import { getAppOrigin, isOAuthProvider } from "@/lib/env";
 import { OAUTH_INTENT_COOKIE, intentCookieOptions } from "@/lib/oauth";
 
 export async function GET(
@@ -15,8 +15,9 @@ export async function GET(
   context: { params: Promise<{ provider: string }> },
 ) {
   const { provider } = await context.params;
+  const origin = getAppOrigin(req);
   if (!isOAuthProvider(provider)) {
-    return NextResponse.redirect(new URL("/login?error=unknown_provider", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/login?error=unknown_provider", origin));
   }
 
   try {
@@ -28,6 +29,6 @@ export async function GET(
   } catch (error) {
     const reason =
       error instanceof ApiError && error.status === 503 ? "provider_not_configured" : "oauth_start_failed";
-    return NextResponse.redirect(new URL(`/login?error=${reason}`, req.nextUrl.origin));
+    return NextResponse.redirect(new URL(`/login?error=${reason}`, origin));
   }
 }
