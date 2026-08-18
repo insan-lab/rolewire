@@ -54,7 +54,7 @@ class Settings(BaseSettings):
 
     # --- Public API limits ------------------------------------------------
     public_apply_rate_limit: int = 1
-    public_apply_rate_window_seconds: int = 600
+    public_apply_rate_window_seconds: int = 60
     public_read_rate_limit: int = 120
     public_read_rate_window_seconds: int = 60
     max_upload_bytes: int = 10 * 1024 * 1024
