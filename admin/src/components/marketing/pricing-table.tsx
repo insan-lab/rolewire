@@ -54,11 +54,10 @@ export function PricingTable({ region }: { region: Region }) {
                 <h2 className="text-base font-semibold text-paper">{plan.title}</h2>
                 {plan.highlighted ? (
                   <span
-                    className="rounded-full px-2 py-0.5 font-mono text-xs font-medium ring-1 ring-inset"
+                    className="rounded-full px-2 py-0.5 font-mono text-xs font-medium ring-1 ring-inset ring-[var(--copper)]"
                     style={{
                       background: "rgba(192,122,62,0.15)",
                       color: "var(--copper-bright)",
-                      ringColor: "var(--copper)",
                     }}
                   >
                     Most complete
