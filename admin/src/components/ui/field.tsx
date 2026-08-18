@@ -7,7 +7,8 @@ import { forwardRef, type InputHTMLAttributes, type ReactNode, type SelectHTMLAt
 import { cn } from "@/lib/utils";
 
 const CONTROL =
-  "w-full rounded-md border border-zinc-300 bg-white px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 disabled:bg-zinc-100 disabled:text-zinc-500 aria-[invalid=true]:border-red-400";
+  "w-full rounded-md border px-2.5 py-1.5 text-sm disabled:opacity-50 aria-[invalid=true]:border-red-400"
+  + " bg-[var(--ink)] border-[var(--line)] text-[var(--paper)] placeholder:text-[var(--text-dim)]";
 
 export function Label({
   children,
@@ -23,10 +24,10 @@ export function Label({
   return (
     <LabelPrimitive.Root
       htmlFor={htmlFor}
-      className={cn("flex items-baseline gap-1.5 text-sm font-medium text-zinc-800", className)}
+      className={cn("flex items-baseline gap-1.5 text-sm font-medium text-paper", className)}
     >
       {children}
-      {optional ? <span className="text-xs font-normal text-zinc-400">optional</span> : null}
+      {optional ? <span className="text-xs font-normal text-dim">optional</span> : null}
     </LabelPrimitive.Root>
   );
 }
@@ -68,7 +69,7 @@ export function FieldError({ children, id }: { children?: ReactNode; id?: string
 
 export function Hint({ children, id }: { children: ReactNode; id?: string }) {
   return (
-    <p id={id} className="text-xs text-zinc-500">
+    <p id={id} className="text-xs text-dim">
       {children}
     </p>
   );
@@ -123,7 +124,7 @@ export function Switch({
       aria-label={label}
       className={cn(
         "relative h-5 w-9 shrink-0 rounded-full border border-transparent transition-colors",
-        checked ? "bg-accent-600" : "bg-zinc-300",
+        checked ? "bg-copper-bright" : "bg-[var(--line)]",
       )}
     >
       <SwitchPrimitive.Thumb className="block size-4 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform data-[state=checked]:translate-x-[1.125rem]" />

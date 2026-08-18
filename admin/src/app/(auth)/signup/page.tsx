@@ -13,27 +13,32 @@ export default function SignupPage() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Create your account</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="font-display text-xl font-semibold tracking-tight text-paper">
+          Create your account
+        </h1>
+        <p className="text-sm text-dim">
           This creates your company workspace and makes you its first admin.
         </p>
       </div>
 
-      <div className="rounded-lg border border-zinc-200 bg-white p-5 shadow-card">
+      <div
+        className="rounded-lg border p-5 shadow-card"
+        style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+      >
         <SignupForm />
 
-        <div className="my-5 flex items-center gap-3 text-xs text-zinc-400">
-          <span className="h-px flex-1 bg-zinc-200" />
+        <div className="my-5 flex items-center gap-3 text-xs text-dim">
+          <span className="h-px flex-1" style={{ background: "var(--line-soft)" }} />
           or
-          <span className="h-px flex-1 bg-zinc-200" />
+          <span className="h-px flex-1" style={{ background: "var(--line-soft)" }} />
         </div>
 
         <OAuthButtons intent="signup" />
       </div>
 
-      <p className="text-center text-sm text-zinc-600">
+      <p className="text-center text-sm text-dim">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-accent-700 hover:underline">
+        <Link href="/login" className="font-medium text-copper-bright hover:underline">
           Log in
         </Link>
       </p>

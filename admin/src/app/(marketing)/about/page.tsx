@@ -20,7 +20,9 @@ export const revalidate = 3600;
 export default function AboutPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-14">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">About Rolewire</h1>
+      <h1 className="font-display text-2xl font-semibold tracking-tight text-paper">
+        About Rolewire
+      </h1>
 
       <div className="prose-plain mt-6 space-y-4">
         <p>
@@ -35,14 +37,14 @@ export default function AboutPage() {
           your own site. That is a reasonable product for a company with no engineers. It is a poor
           fit for one that has a design system, a marketing site and opinions about both.
         </p>
-        <h2 className="pt-2 text-base font-semibold text-zinc-900">Why headless</h2>
+        <h2 className="pt-2 text-base font-semibold text-paper">Why headless</h2>
         <p>
           The public API is two endpoints: list published jobs, and fetch one job with its typed
           questions. A third accepts the application. That is enough to build any career page —
           server-rendered, static, single-page, native app — without asking us for a feature. Nothing
           applicant-facing is rendered by Rolewire, so nothing applicant-facing is ours to break.
         </p>
-        <h2 className="pt-2 text-base font-semibold text-zinc-900">Why your storage</h2>
+        <h2 className="pt-2 text-base font-semibold text-paper">Why your storage</h2>
         <p>
           Résumés are the sensitive part of hiring, and charging rent on them is an odd business to
           be in. Connect an S3 bucket, a Google Drive folder or a Telegram channel and applicant
@@ -50,12 +52,13 @@ export default function AboutPage() {
           servers. If you would rather not run storage, the hosted tier exists with a quota included
           in every plan.
         </p>
-        <h2 className="pt-2 text-base font-semibold text-zinc-900">Who builds it</h2>
+        <h2 className="pt-2 text-base font-semibold text-paper">Who builds it</h2>
         <p>
-          Rolewire is built by <strong>[company/team name]</strong>, based in{" "}
-          <strong>[city, country]</strong>, working on it since <strong>[year]</strong>. It is a small
-          team, which is why the product is narrow on purpose: one job done properly rather than an
-          all-in-one suite maintained badly.
+          Rolewire is built by <strong className="text-paper">[company/team name]</strong>, based in{" "}
+          <strong className="text-paper">[city, country]</strong>, working on it since{" "}
+          <strong className="text-paper">[year]</strong>. It is a small team, which is why the
+          product is narrow on purpose: one job done properly rather than an all-in-one suite
+          maintained badly.
         </p>
         <p>
           Payments run through Paddle for customers outside Bangladesh and UddoktaPay for customers
@@ -64,15 +67,21 @@ export default function AboutPage() {
         </p>
       </div>
 
-      <div className="mt-10 rounded-lg border border-zinc-200 bg-zinc-50 p-5">
-        <h2 className="text-sm font-semibold text-zinc-900">Questions before you sign up?</h2>
-        <p className="mt-1 text-sm text-zinc-600">
+      <div
+        className="mt-10 rounded-lg border p-5"
+        style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+      >
+        <h2 className="text-sm font-semibold text-paper">Questions before you sign up?</h2>
+        <p className="mt-1 text-sm text-dim">
           Write to{" "}
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="font-medium text-accent-700 hover:underline">
+          <a
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="font-medium text-copper-bright hover:underline"
+          >
             {SUPPORT_EMAIL}
           </a>{" "}
           or use the{" "}
-          <Link href="/contact" className="font-medium text-accent-700 hover:underline">
+          <Link href="/contact" className="font-medium text-copper-bright hover:underline">
             contact form
           </Link>
           . A person answers.

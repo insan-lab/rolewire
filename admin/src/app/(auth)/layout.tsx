@@ -4,13 +4,13 @@ import type { ReactNode } from "react";
 /** Centered card shell for authentication screens — no sidebar, no session required. */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-zinc-50">
+    <div className="flex min-h-dvh flex-col bg-ink">
       <header className="px-5 py-5">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm font-semibold tracking-tight text-zinc-900"
+          className="inline-flex items-center gap-1.5 font-mono text-sm font-medium tracking-tight text-paper"
         >
-          <span aria-hidden className="size-2.5 rounded-sm bg-accent-600" />
+          <span aria-hidden className="size-2 rounded-full bg-copper-bright" />
           Rolewire
         </Link>
       </header>

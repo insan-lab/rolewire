@@ -16,7 +16,7 @@ export function PricingTable({ region }: { region: Region }) {
     <div className="mx-auto max-w-5xl px-5 py-14">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+          <h1 className="font-display text-2xl font-semibold tracking-tight text-paper">
             Pricing {region === "bd" ? "in Bangladesh" : ""}
           </h1>
           <p className="prose-plain mt-2 max-w-2xl">
@@ -24,12 +24,15 @@ export function PricingTable({ region }: { region: Region }) {
             storage on every plan.
           </p>
         </div>
-        <Link href={other.href} className="text-sm font-medium text-accent-700 hover:underline">
+        <Link href={other.href} className="font-mono text-sm text-copper-bright hover:underline">
           {other.label}
         </Link>
       </div>
 
-      <p className="mt-4 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+      <p
+        className="mt-4 rounded-md border px-3 py-2 text-sm text-dim"
+        style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+      >
         Billed in {copy.currency} through {copy.provider}. {copy.note}
       </p>
 
@@ -40,42 +43,52 @@ export function PricingTable({ region }: { region: Region }) {
           return (
             <section
               key={plan.name}
-              className={`rounded-lg border bg-white p-6 shadow-card ${
-                plan.highlighted ? "border-accent-300 ring-1 ring-accent-200" : "border-zinc-200"
-              }`}
+              className="rounded-lg border p-6"
+              style={{
+                background: "var(--ink-soft)",
+                borderColor: plan.highlighted ? "var(--copper)" : "var(--line-soft)",
+                boxShadow: plan.highlighted ? "0 0 0 1px var(--copper)" : undefined,
+              }}
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-base font-semibold text-zinc-900">{plan.title}</h2>
+                <h2 className="text-base font-semibold text-paper">{plan.title}</h2>
                 {plan.highlighted ? (
-                  <span className="rounded-full bg-accent-50 px-2 py-0.5 text-xs font-medium text-accent-700 ring-1 ring-inset ring-accent-200">
+                  <span
+                    className="rounded-full px-2 py-0.5 font-mono text-xs font-medium ring-1 ring-inset"
+                    style={{
+                      background: "rgba(192,122,62,0.15)",
+                      color: "var(--copper-bright)",
+                      ringColor: "var(--copper)",
+                    }}
+                  >
                     Most complete
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-sm text-zinc-600">{plan.tagline}</p>
+              <p className="mt-1 text-sm text-dim">{plan.tagline}</p>
 
               <p className="mt-5 flex items-baseline gap-1">
-                <span className="text-3xl font-semibold tracking-tight text-zinc-900">
+                <span className="text-3xl font-semibold tracking-tight text-paper">
                   {symbol}
                   {monthly}
                 </span>
-                <span className="text-sm text-zinc-500">/month</span>
+                <span className="text-sm text-dim">/month</span>
               </p>
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 font-mono text-xs text-dim">
                 or {symbol}
                 {yearly} a year — two months off
               </p>
 
-              <ul className="mt-5 space-y-2 text-sm text-zinc-700">
+              <ul className="mt-5 space-y-2 text-sm text-dim">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex gap-2">
-                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-emerald-600" />
-                    <span>{feature}</span>
+                    <Check aria-hidden className="mt-0.5 size-4 shrink-0 text-signal" />
+                    <span className="text-paper">{feature}</span>
                   </li>
                 ))}
                 {plan.limits.map((limit) => (
-                  <li key={limit} className="flex gap-2 text-zinc-500">
-                    <Minus aria-hidden className="mt-0.5 size-4 shrink-0 text-zinc-400" />
+                  <li key={limit} className="flex gap-2 text-dim">
+                    <Minus aria-hidden className="mt-0.5 size-4 shrink-0 text-dim" />
                     <span>{limit}</span>
                   </li>
                 ))}
@@ -83,11 +96,12 @@ export function PricingTable({ region }: { region: Region }) {
 
               <Link
                 href="/signup"
-                className={`mt-6 inline-flex h-9 w-full items-center justify-center rounded-md text-sm font-medium ${
+                className="mt-6 inline-flex h-9 w-full items-center justify-center rounded-md text-sm font-medium transition-colors hover:opacity-90"
+                style={
                   plan.highlighted
-                    ? "bg-accent-600 text-white hover:bg-accent-700"
-                    : "border border-zinc-300 text-zinc-800 hover:bg-zinc-50"
-                }`}
+                    ? { backgroundColor: "var(--copper-bright)", color: "var(--ink)" }
+                    : { border: "1px solid var(--line-soft)", color: "var(--text-dim)" }
+                }
               >
                 Start with {plan.title}
               </Link>
@@ -125,8 +139,8 @@ export function PricingTable({ region }: { region: Region }) {
 function Faq({ question, answer }: { question: string; answer: string }) {
   return (
     <div>
-      <h3 className="font-medium text-zinc-900">{question}</h3>
-      <p className="mt-1 leading-relaxed text-zinc-600">{answer}</p>
+      <h3 className="font-medium text-paper">{question}</h3>
+      <p className="mt-1 leading-relaxed text-dim">{answer}</p>
     </div>
   );
 }
