@@ -8,7 +8,7 @@ import { ContactSubmissionRow } from "@/components/platform/contact-submission-r
 import { listPlatformContactSubmissions } from "@/lib/api/platform-queries";
 import type { ContactSubmissionStatus } from "@/lib/api/types";
 
-export const metadata: Metadata = { title: "Contact Submissions" };
+export const metadata: Metadata = { title: "Contact Messages" };
 
 const PAGE_SIZE = 50;
 
@@ -40,8 +40,8 @@ export default async function PlatformContactSubmissionsPage({
   return (
     <>
       <PageHeader
-        title="Contact Submissions"
-        description={`${page.total} public contact form inquiry ${page.total === 1 ? "submission" : "submissions"}`}
+        title="Contact Messages"
+        description={`${page.total} public contact form ${page.total === 1 ? "message" : "messages"}`}
       />
 
       <div className="mb-4 flex items-center gap-1.5 overflow-x-auto pb-1">

@@ -16,7 +16,7 @@ const NAV: NavItem[] = [
   { href: "/platform/users", label: "Users", icon: <Users className="size-4" /> },
   { href: "/platform/jobs", label: "Jobs", icon: <Briefcase className="size-4" /> },
   { href: "/platform/billing", label: "Billing", icon: <CreditCard className="size-4" /> },
-  { href: "/platform/contact", label: "Submissions", icon: <Mail className="size-4" /> },
+  { href: "/platform/contact", label: "Messages", icon: <Mail className="size-4" /> },
 ];
 
 export function PlatformSidebar({ adminEmail }: { adminEmail: string }) {
