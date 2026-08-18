@@ -97,6 +97,13 @@ async def set_public_context(session: AsyncSession) -> None:
     await session.execute(text("SELECT set_config('app.public_context', 'on', true)"))
 
 
+async def set_platform_context(session: AsyncSession) -> None:
+    """Unlock the cross-tenant, SELECT-only ``platform_read`` policies for the superadmin panel."""
+    if not _rls_enabled():
+        return
+    await session.execute(text("SELECT set_config('app.platform_context', 'on', true)"))
+
+
 async def set_auth_context(session: AsyncSession) -> None:
     """Unlock the pre-authentication identity lookup policies on ``users``/``oauth_accounts``.
 

@@ -10,18 +10,43 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { TokenPair } from "@/lib/api/types";
 import {
   ACCESS_COOKIE,
-  REFRESH_COOKIE,
+  type CookieNames,
   expiredCookies,
   needsRefresh,
+  PLATFORM_COOKIES,
+  REFRESH_COOKIE,
   sessionCookies,
 } from "@/lib/session";
 
 const API_BASE = (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000")
   .replace(/\/$/, "");
 
-async function exchangeRefreshToken(token: string): Promise<TokenPair | null> {
+const TENANT_COOKIES: CookieNames = { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE };
+
+type SessionConfig = {
+  cookies: CookieNames;
+  refreshPath: string;
+  loginPath: string;
+  defaultNext: string;
+};
+
+const TENANT_SESSION: SessionConfig = {
+  cookies: TENANT_COOKIES,
+  refreshPath: "/v1/admin/auth/refresh",
+  loginPath: "/login",
+  defaultNext: "/dashboard",
+};
+
+const PLATFORM_SESSION: SessionConfig = {
+  cookies: PLATFORM_COOKIES,
+  refreshPath: "/v1/admin/platform/auth/refresh",
+  loginPath: "/platform/login",
+  defaultNext: "/platform",
+};
+
+async function exchangeRefreshToken(refreshPath: string, token: string): Promise<TokenPair | null> {
   try {
-    const response = await fetch(`${API_BASE}/v1/admin/auth/refresh`, {
+    const response = await fetch(`${API_BASE}${refreshPath}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ refresh_token: token }),
@@ -36,49 +61,56 @@ async function exchangeRefreshToken(token: string): Promise<TokenPair | null> {
   }
 }
 
-function loginRedirect(request: NextRequest, reason: string): NextResponse {
+function loginRedirect(request: NextRequest, session: SessionConfig, reason: string): NextResponse {
   const url = request.nextUrl.clone();
-  url.pathname = "/login";
+  url.pathname = session.loginPath;
   url.search = "";
   url.searchParams.set("reason", reason);
   const next = `${request.nextUrl.pathname}${request.nextUrl.search}`;
-  if (next && next !== "/dashboard") url.searchParams.set("next", next);
+  if (next && next !== session.defaultNext) url.searchParams.set("next", next);
 
   const response = NextResponse.redirect(url);
-  for (const cookie of expiredCookies()) {
+  for (const cookie of expiredCookies(session.cookies)) {
     response.cookies.set(cookie.name, cookie.value, cookie.options);
   }
   return response;
 }
 
-export async function middleware(request: NextRequest) {
-  const access = request.cookies.get(ACCESS_COOKIE)?.value;
-  const refresh = request.cookies.get(REFRESH_COOKIE)?.value;
+async function guard(request: NextRequest, session: SessionConfig): Promise<NextResponse> {
+  const access = request.cookies.get(session.cookies.access)?.value;
+  const refresh = request.cookies.get(session.cookies.refresh)?.value;
 
   if (!refresh) {
-    return loginRedirect(request, access ? "session_expired" : "sign_in_required");
+    return loginRedirect(request, session, access ? "session_expired" : "sign_in_required");
   }
 
   if (!needsRefresh(access)) {
     return NextResponse.next();
   }
 
-  const tokens = await exchangeRefreshToken(refresh);
+  const tokens = await exchangeRefreshToken(session.refreshPath, refresh);
   if (!tokens) {
     // Distinguish a dead session from an unreachable API: only bounce when we have no usable token.
-    return access ? NextResponse.next() : loginRedirect(request, "session_expired");
+    return access ? NextResponse.next() : loginRedirect(request, session, "session_expired");
   }
 
   // Update the *request* cookies too, so the page/handler this request reaches sees the fresh
   // token rather than the one that is about to expire.
-  request.cookies.set(ACCESS_COOKIE, tokens.access_token);
-  request.cookies.set(REFRESH_COOKIE, tokens.refresh_token);
+  request.cookies.set(session.cookies.access, tokens.access_token);
+  request.cookies.set(session.cookies.refresh, tokens.refresh_token);
 
   const response = NextResponse.next({ request });
-  for (const cookie of sessionCookies(tokens)) {
+  for (const cookie of sessionCookies(tokens, session.cookies)) {
     response.cookies.set(cookie.name, cookie.value, cookie.options);
   }
   return response;
+}
+
+export async function middleware(request: NextRequest) {
+  const isPlatform =
+    request.nextUrl.pathname.startsWith("/platform") ||
+    request.nextUrl.pathname.startsWith("/api/platform-backend");
+  return guard(request, isPlatform ? PLATFORM_SESSION : TENANT_SESSION);
 }
 
 export const config = {
@@ -89,5 +121,11 @@ export const config = {
     "/settings/:path*",
     "/billing/:path*",
     "/api/backend/:path*",
+    "/platform",
+    "/platform/users/:path*",
+    "/platform/companies/:path*",
+    "/platform/jobs/:path*",
+    "/platform/billing/:path*",
+    "/api/platform-backend/:path*",
   ],
 };

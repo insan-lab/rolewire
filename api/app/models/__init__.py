@@ -116,6 +116,21 @@ class Tenant(Base):
     plan: Mapped[Plan | None] = relationship(lazy="selectin")
 
 
+class PlatformAdmin(Base):
+    """Rolewire operator account — not a tenant member, sees across every tenant (§platform).
+
+    Deliberately its own table rather than a flag on ``users``: ``users.tenant_id`` is NOT NULL,
+    and keeping the identity separate means a bug in tenant auth can never grant platform access.
+    """
+
+    __tablename__ = "platform_admins"
+
+    id: Mapped[uuid.UUID] = _pk()
+    email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -381,6 +396,7 @@ __all__ = [
     "JobQuestion",
     "OAuthAccount",
     "Plan",
+    "PlatformAdmin",
     "StorageConfig",
     "Subscription",
     "TENANT_SCOPED_TABLES",

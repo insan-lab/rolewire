@@ -26,6 +26,7 @@ from app.routers import (
     admin_jobs,
     admin_oauth,
     admin_storage,
+    platform,
     public,
     webhooks,
 )
@@ -105,6 +106,7 @@ def create_app() -> FastAPI:
     app.include_router(admin_jobs.router)
     app.include_router(admin_storage.router)
     app.include_router(admin_billing.router)
+    app.include_router(platform.router)
     app.include_router(webhooks.router)
 
     @app.get("/health", tags=["ops"], summary="Liveness probe")

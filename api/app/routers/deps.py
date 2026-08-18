@@ -11,9 +11,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.db import get_db, set_tenant_context
+from app.core.db import get_db, set_platform_context, set_tenant_context
 from app.core.security import TokenError, decode_token
-from app.models import Tenant, User
+from app.models import PlatformAdmin, Tenant, User
 
 bearer_scheme = HTTPBearer(auto_error=False, description="Admin panel access token")
 
@@ -86,6 +86,34 @@ async def require_admin(principal: CurrentPrincipal) -> Principal:
 
 
 AdminPrincipal = Annotated[Principal, Depends(require_admin)]
+
+
+async def get_platform_admin(
+    session: DbSession,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)] = None,
+) -> PlatformAdmin:
+    """Verify a platform token and unlock the cross-tenant ``platform_read`` RLS policies."""
+    if credentials is None or not credentials.credentials:
+        raise _unauthorized("missing bearer token")
+    try:
+        claims = decode_token(credentials.credentials, expected_type="platform_access")
+    except TokenError as exc:
+        raise _unauthorized(str(exc)) from exc
+
+    try:
+        admin_id = uuid.UUID(claims["sub"])
+    except ValueError as exc:
+        raise _unauthorized("malformed token claims") from exc
+
+    await set_platform_context(session)
+
+    admin = await session.scalar(select(PlatformAdmin).where(PlatformAdmin.id == admin_id))
+    if admin is None:
+        raise _unauthorized("token subject no longer exists")
+    return admin
+
+
+CurrentPlatformAdmin = Annotated[PlatformAdmin, Depends(get_platform_admin)]
 
 
 def client_ip(request: Request) -> str | None:

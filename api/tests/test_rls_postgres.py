@@ -136,6 +136,39 @@ async def test_public_context_exposes_only_published_jobs(pg_sessionmaker) -> No
     assert titles == ["Alpha Role"]
 
 
+async def test_platform_context_reads_across_tenants(pg_sessionmaker) -> None:
+    async with pg_sessionmaker() as session:
+        alpha, beta, _ = await _seed_two_tenants(session)
+        await session.execute(text("SELECT set_config('app.current_tenant_id', :t, true)"), {"t": str(beta)})
+        await session.execute(
+            text(
+                "INSERT INTO jobs (id, tenant_id, title, status, storage_target, opencats_sync,"
+                " created_at, updated_at) VALUES (:id, :t, 'Beta Role', 'draft', 'hosted', false,"
+                " now(), now())"
+            ),
+            {"id": uuid.uuid4(), "t": beta},
+        )
+        await session.commit()
+
+    async with pg_sessionmaker() as session:
+        await session.execute(text("SELECT set_config('app.platform_context', 'on', true)"))
+        titles = set(await session.scalars(text("SELECT title FROM jobs")))
+    assert titles == {"Alpha Role", "Beta Role"}
+
+
+async def test_platform_context_is_select_only(pg_sessionmaker) -> None:
+    async with pg_sessionmaker() as session:
+        alpha, _, alpha_job = await _seed_two_tenants(session)
+
+    async with pg_sessionmaker() as session:
+        await session.execute(text("SELECT set_config('app.platform_context', 'on', true)"))
+        result = await session.execute(
+            text("UPDATE jobs SET title = 'Smuggled' WHERE id = :id"), {"id": alpha_job}
+        )
+        assert result.rowcount == 0
+        await session.rollback()
+
+
 async def test_auth_context_is_select_only(pg_sessionmaker) -> None:
     async with pg_sessionmaker() as session:
         alpha, _, _ = await _seed_two_tenants(session)

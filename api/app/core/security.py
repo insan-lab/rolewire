@@ -14,7 +14,8 @@ from app.core.config import get_settings
 
 _hasher = PasswordHasher()
 
-TokenType = Literal["access", "refresh"]
+TokenType = Literal["access", "refresh", "platform_access", "platform_refresh"]
+_TENANT_TOKEN_TYPES = ("access", "refresh")
 
 
 class TokenError(Exception):
@@ -44,21 +45,22 @@ def needs_rehash(password_hash: str) -> bool:
 def _encode(
     *,
     subject: str,
-    tenant_id: str,
     token_type: TokenType,
     ttl_seconds: int,
+    tenant_id: str | None = None,
     extra: dict[str, Any] | None = None,
 ) -> str:
     settings = get_settings()
     now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": subject,
-        "tenant_id": tenant_id,
         "type": token_type,
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(seconds=ttl_seconds)).timestamp()),
         "jti": uuid.uuid4().hex,
     }
+    if tenant_id is not None:
+        payload["tenant_id"] = tenant_id
     if extra:
         payload.update(extra)
     return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
@@ -83,6 +85,22 @@ def create_refresh_token(*, user_id: str, tenant_id: str) -> str:
     )
 
 
+def create_platform_access_token(*, admin_id: str) -> str:
+    return _encode(
+        subject=admin_id,
+        token_type="platform_access",
+        ttl_seconds=get_settings().access_token_ttl_seconds,
+    )
+
+
+def create_platform_refresh_token(*, admin_id: str) -> str:
+    return _encode(
+        subject=admin_id,
+        token_type="platform_refresh",
+        ttl_seconds=get_settings().refresh_token_ttl_seconds,
+    )
+
+
 def decode_token(token: str, *, expected_type: TokenType) -> dict[str, Any]:
     settings = get_settings()
     try:
@@ -91,6 +109,8 @@ def decode_token(token: str, *, expected_type: TokenType) -> dict[str, Any]:
         raise TokenError(str(exc)) from exc
     if claims.get("type") != expected_type:
         raise TokenError(f"expected a {expected_type} token")
-    if not claims.get("sub") or not claims.get("tenant_id"):
+    if not claims.get("sub"):
+        raise TokenError("token is missing required claims")
+    if expected_type in _TENANT_TOKEN_TYPES and not claims.get("tenant_id"):
         raise TokenError("token is missing required claims")
     return claims

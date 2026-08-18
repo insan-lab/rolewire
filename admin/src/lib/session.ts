@@ -15,6 +15,11 @@ import type { TokenPair } from "./api/types";
 export const ACCESS_COOKIE = "rw_access";
 export const REFRESH_COOKIE = "rw_refresh";
 
+/** Platform-superadmin session — deliberately separate cookies from the tenant session above, so
+ * the two can never be confused and a tenant admin's cookies grant no platform access. */
+export const PLATFORM_ACCESS_COOKIE = "rw_platform_access";
+export const PLATFORM_REFRESH_COOKIE = "rw_platform_refresh";
+
 /** Refresh this many seconds before the access token actually expires (spec §4: ~2 minutes). */
 export const REFRESH_SKEW_SECONDS = 120;
 
@@ -41,26 +46,34 @@ export function cookieAttributes(maxAge: number): CookieAttributes {
 
 export type SessionCookie = { name: string; value: string; options: CookieAttributes };
 
+export type CookieNames = { access: string; refresh: string };
+
+const TENANT_COOKIES: CookieNames = { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE };
+export const PLATFORM_COOKIES: CookieNames = {
+  access: PLATFORM_ACCESS_COOKIE,
+  refresh: PLATFORM_REFRESH_COOKIE,
+};
+
 /** The cookie pair to write after a successful login/signup/refresh/OAuth exchange. */
-export function sessionCookies(tokens: TokenPair): SessionCookie[] {
+export function sessionCookies(tokens: TokenPair, names: CookieNames = TENANT_COOKIES): SessionCookie[] {
   return [
     {
-      name: ACCESS_COOKIE,
+      name: names.access,
       value: tokens.access_token,
       // Keep the cookie alive slightly past token expiry so middleware can read the stale token
       // and decide to refresh, rather than seeing no cookie at all and bouncing to /login.
       options: cookieAttributes((tokens.expires_in ?? 900) + REFRESH_MAX_AGE_SECONDS),
     },
     {
-      name: REFRESH_COOKIE,
+      name: names.refresh,
       value: tokens.refresh_token,
       options: cookieAttributes(REFRESH_MAX_AGE_SECONDS),
     },
   ];
 }
 
-export function expiredCookies(): SessionCookie[] {
-  return [ACCESS_COOKIE, REFRESH_COOKIE].map((name) => ({
+export function expiredCookies(names: CookieNames = TENANT_COOKIES): SessionCookie[] {
+  return [names.access, names.refresh].map((name) => ({
     name,
     value: "",
     options: cookieAttributes(0),
@@ -110,6 +123,19 @@ export function readClaims(token: string | undefined): SessionClaims | null {
       tenantId: claims.tenant_id,
       role: typeof claims.role === "string" ? claims.role : "member",
     };
+  } catch {
+    return null;
+  }
+}
+
+export type PlatformSessionClaims = { adminId: string };
+
+export function readPlatformClaims(token: string | undefined): PlatformSessionClaims | null {
+  if (!token) return null;
+  try {
+    const claims = decodeJwt(token);
+    if (typeof claims.sub !== "string") return null;
+    return { adminId: claims.sub };
   } catch {
     return null;
   }
