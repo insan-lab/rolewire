@@ -283,7 +283,6 @@ class Application(Base):
     answers: Mapped[dict[str, Any]] = mapped_column(JSONType, nullable=False)
     resume_ref: Mapped[str | None] = mapped_column(Text)
     applicant_email: Mapped[str | None] = mapped_column(Text)
-    ip_hash: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(16), default="received", nullable=False)
     created_at: Mapped[datetime] = _created_at()
 

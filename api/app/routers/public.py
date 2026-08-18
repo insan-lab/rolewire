@@ -315,7 +315,6 @@ async def apply(
         answers=cleaned,
         resume_ref=payload.resume_ref or resume_ref_from_answers(list(job.questions), cleaned),
         applicant_email=(payload.applicant_email or _email_from_answers(job, cleaned)),
-        ip_hash=ip_digest,
         status="received",
     )
     session.add(application)

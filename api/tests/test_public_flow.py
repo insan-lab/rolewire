@@ -69,7 +69,7 @@ async def test_listing_can_be_filtered_by_company_slug(client: AsyncClient) -> N
     assert (await client.get("/v1/public/jobs", params={"slug": "nope"})).status_code == 404
 
 
-async def test_apply_stores_application_with_hashed_ip(client: AsyncClient) -> None:
+async def test_apply_stores_application(client: AsyncClient) -> None:
     headers = await auth_headers(client, email="apply@acmecorp.io")
     job = await _create_job(client, headers)
 
@@ -88,8 +88,7 @@ async def test_apply_stores_application_with_hashed_ip(client: AsyncClient) -> N
     assert stored is not None
     assert stored.answers["years_experience"] == 4
     assert stored.applicant_email == "jane@example.org"
-    # Raw IPs are never persisted (§12).
-    assert stored.ip_hash and "203.0.113.7" not in stored.ip_hash
+    assert not hasattr(stored, "ip_hash")
 
     listed = await client.get(
         "/v1/admin/applications", params={"job_id": job["id"]}, headers=headers

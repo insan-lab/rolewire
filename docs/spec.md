@@ -159,7 +159,6 @@ CREATE TABLE applications (
     answers JSONB NOT NULL,           -- { field_key: value, ... }
     resume_ref TEXT,                  -- pointer/URL into storage_target (not the file itself, unless hosted)
     applicant_email TEXT,
-    ip_hash TEXT,                     -- hashed, for abuse/rate-limit auditing, not raw PII
     status TEXT DEFAULT 'received',   -- received | forwarded | failed
     created_at TIMESTAMPTZ DEFAULT now()
 );
@@ -538,7 +537,7 @@ rolewire/
 - Storage credentials (`storage_configs.encrypted_credentials`) are envelope-encrypted; the encryption key itself lives in 1Password/KMS, never in the database or repo
 - OAuth access/refresh tokens in `oauth_accounts`, where retained, use the same envelope-encryption pattern
 - Public endpoints get aggressive rate limiting and payload size caps (file uploads capped per plan) to prevent abuse of the intentionally-unauthenticated surface
-- `ip_hash` (not raw IP) stored on applications for abuse investigation without retaining unnecessary PII
+- IPs are never persisted; `ip_hash` is derived transiently and only lives in the Redis rate-limit key (TTL'd)
 - CORS on public endpoints is intentionally permissive (`*`) since businesses embed these on arbitrary custom domains — admin endpoints are strictly locked to the admin panel's own origin
 - Payment webhook endpoints (`/v1/webhooks/paddle`, `/v1/webhooks/uddoktapay`, `/v1/webhooks/brevo`) verify provider signatures before processing and are excluded from the general admin JWT requirement — signature verification is the auth for these routes
 

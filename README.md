@@ -119,7 +119,8 @@ reason. Point it at a throwaway database — it runs `alembic downgrade base` fi
 
 ## Security notes
 
-- Applicant IPs are stored only as a salted HMAC (`ip_hash`), never raw.
+- Applicant IPs are never persisted. A salted HMAC of the IP is used transiently as a Redis
+  rate-limit key (TTL'd, never written to the database).
 - Storage credentials and retained OAuth tokens are Fernet-encrypted; the key comes from the
   environment (1Password/KMS) and never touches the database or repo. Credentials are never echoed
   back by the API.
