@@ -34,7 +34,11 @@ The admin panel is where a tenant's team logs in, creates job posts with custom 
 ## 3. Route Map
 
 ```
-/                          → redirect to /login or /dashboard depending on session
+/                          → public marketing landing page (see §3.1)
+/pricing                   → public pricing page — global (Paddle) tiers by default
+/pricing/bd                → public pricing page — Bangladesh (UddoktaPay/BDT) tiers
+/about                     → company/product story — who's behind Rolewire, why headless
+/contact                   → contact form (routes to support inbox) + direct support email/socials
 
 /login                     → email+password login, OAuth buttons (Google/Facebook/GitHub/LinkedIn)
 /signup                    → tenant + first admin user creation, OAuth buttons
@@ -61,7 +65,29 @@ The admin panel is where a tenant's team logs in, creates job posts with custom 
 /billing/upgrade           → plan comparison + Paddle checkout overlay (global) or UddoktaPay redirect (BD)
 ```
 
-Route groups: `(auth)` for `/login`, `/signup`, `/auth/*` (no sidebar shell); `(app)` for everything else (sidebar + topbar shell, requires session).
+Route groups: `(marketing)` for `/`, `/pricing`, `/pricing/bd`, `/about`, `/contact` (public, no auth, fully static/SSG where possible for SEO); `(auth)` for `/login`, `/signup`, `/auth/*` (no sidebar shell); `(app)` for everything else (sidebar + topbar shell, requires session).
+
+### 3.1 Landing page (`/`)
+
+The one page in this app that *is* a marketing surface rather than an operational tool — the design-direction split in §7 applies here: `/` gets the deliberate, opinionated visual treatment; `(app)` stays quiet and dense.
+
+**Sections (in order):**
+1. **Hero** — states the core pitch plainly: headless job posting + application API, no forced UI, bring your own storage. A code/JSON snippet showing the actual `GET /v1/public/jobs/{id}` response (from backend spec §5.1) works better here than a generic product screenshot — it's the most characteristic artifact of what Rolewire actually is.
+2. **How it works** — three-part flow: post a job in the panel → embed the API on your own career page → receive applications wherever you already store files (S3/Drive/Telegram/hosted). This is a real sequence, so numbered steps are earned here, unlike a decorative 01/02/03 elsewhere.
+3. **Storage flexibility** — calls out the free bring-your-own-storage options explicitly; this is a genuine differentiator worth its own section, not a footnote.
+4. **Pricing teaser** — plan names and price, linking to `/pricing` (or `/pricing/bd`) for the full breakdown; region shown is guessed softly from `Accept-Language`/geo but never auto-redirects silently, matching the region-resolution principle in the backend spec.
+5. **CTA** — `/signup`, with OAuth buttons available immediately rather than gated behind a form.
+
+**Auth-aware behavior:** a logged-in visitor hitting `/` gets a lightweight "Go to dashboard" affordance rather than being force-redirected away from the marketing page — someone might land on `/` from a shared link while already logged in and still want to see it.
+
+**Rendering:** static-generated (SSG) or ISR with a long revalidate window, since content changes infrequently and this is the page most exposed to SEO/cold traffic — no reason to pay Server Component data-fetch cost on every load the way `/dashboard` does.
+
+### 3.2 `/about` and `/contact`
+
+Both static, low-priority pages relative to `/` and `/pricing`, but real search-entry and trust-signal surfaces worth having from day one rather than bolted on later:
+
+- **`/about`** — short, plain account of what Rolewire is and why it's built headless/API-first, plus enough real information (team, location) to read as a legitimate business rather than a template SaaS — worth keeping honest and specific rather than generic "our mission" copy.
+- **`/contact`** — a simple form (name, email, message) posting to a route handler that sends via Brevo to the support inbox (matches backend spec §11 — Brevo owns outbound transactional mail), plus a direct support email address shown in text for anyone who'd rather not use a form. No live chat widget for v0.1 — adds a third-party script dependency for a volume this stage doesn't need yet.
 
 ---
 
