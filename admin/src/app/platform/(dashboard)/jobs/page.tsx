@@ -1,7 +1,7 @@
 import { Briefcase } from "lucide-react";
 import type { Metadata } from "next";
 
-import { JobStatusBadge } from "@/components/ui/badge";
+import { JobStatusSelect } from "@/components/platform/job-status-select";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
@@ -53,7 +53,7 @@ export default async function PlatformJobsPage({
                       <CopyableId id={job.tenant_id} label="Company ID" />
                     </Td>
                     <Td>
-                      <JobStatusBadge status={job.status as JobStatus} />
+                      <JobStatusSelect jobId={job.id} currentStatus={job.status} />
                     </Td>
                     <Td className="text-right text-dim">
                       {pluralize(job.application_count, "application")}

@@ -1,7 +1,7 @@
 import { Building2 } from "lucide-react";
 import type { Metadata } from "next";
 
-import { TenantStatusBadge } from "@/components/ui/badge";
+import { CompanyStatusSelect } from "@/components/platform/company-status-select";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
@@ -54,7 +54,7 @@ export default async function PlatformCompaniesPage({
                       <CopyableId id={company.id} label="Company ID" />
                     </Td>
                     <Td>
-                      <TenantStatusBadge status={company.status} />
+                      <CompanyStatusSelect companyId={company.id} currentStatus={company.status} />
                     </Td>
                     <Td className="capitalize text-dim">{company.plan_name ?? "—"}</Td>
                     <Td className="text-dim">{company.region ?? "—"}</Td>

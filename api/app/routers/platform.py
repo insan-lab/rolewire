@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import func, select
 
 from app.core.config import get_settings
+from app.core.db import set_tenant_context
 from app.core.rate_limit import hit
 from app.core.security import (
     TokenError,
@@ -38,13 +39,16 @@ from app.schemas.contact import ContactSubmissionOut, ContactSubmissionStatusUpd
 from app.schemas.platform import (
     PlatformAdminOut,
     PlatformCompanyOut,
+    PlatformCompanyStatusUpdate,
     PlatformInvoiceOut,
     PlatformJobOut,
+    PlatformJobStatusUpdate,
     PlatformLoginRequest,
     PlatformRefreshRequest,
     PlatformStats,
     PlatformTokenPair,
     PlatformUserOut,
+    PlatformUserUpdate,
 )
 
 router = APIRouter(prefix="/v1/admin/platform", tags=["platform"])
@@ -174,6 +178,43 @@ async def list_users(
     return Page[PlatformUserOut](items=items, total=int(total), limit=limit, offset=offset)
 
 
+@router.patch("/users/{user_id}", response_model=PlatformUserOut)
+async def update_user(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    user_id: uuid.UUID,
+    payload: PlatformUserUpdate,
+) -> PlatformUserOut:
+    user = await session.scalar(select(User).where(User.id == user_id))
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
+        )
+
+    await set_tenant_context(session, user.tenant_id)
+    if payload.role is not None:
+        user.role = payload.role
+    if payload.email_verified is not None:
+        user.email_verified = payload.email_verified
+    await session.flush()
+
+    tenant_info = await session.execute(
+        select(Tenant.name, Tenant.slug).where(Tenant.id == user.tenant_id)
+    )
+    tenant_name, tenant_slug = tenant_info.one()
+
+    return PlatformUserOut(
+        id=user.id,
+        email=user.email,
+        role=user.role,
+        email_verified=user.email_verified,
+        created_at=user.created_at,
+        tenant_id=user.tenant_id,
+        tenant_name=tenant_name,
+        tenant_slug=tenant_slug,
+    )
+
+
 @router.get("/companies", response_model=Page[PlatformCompanyOut])
 async def list_companies(
     admin: CurrentPlatformAdmin,
@@ -214,6 +255,49 @@ async def list_companies(
     return Page[PlatformCompanyOut](items=items, total=int(total), limit=limit, offset=offset)
 
 
+@router.patch("/companies/{company_id}", response_model=PlatformCompanyOut)
+async def update_company_status(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    company_id: uuid.UUID,
+    payload: PlatformCompanyStatusUpdate,
+) -> PlatformCompanyOut:
+    company = await session.scalar(select(Tenant).where(Tenant.id == company_id))
+    if company is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="company not found"
+        )
+
+    company.status = payload.status
+    await session.flush()
+
+    user_counts = (
+        select(User.tenant_id, func.count().label("n")).group_by(User.tenant_id).subquery()
+    )
+    job_counts = select(Job.tenant_id, func.count().label("n")).group_by(Job.tenant_id).subquery()
+
+    row = await session.execute(
+        select(Tenant, Plan.name, user_counts.c.n, job_counts.c.n)
+        .outerjoin(Plan, Plan.id == Tenant.plan_id)
+        .outerjoin(user_counts, user_counts.c.tenant_id == Tenant.id)
+        .outerjoin(job_counts, job_counts.c.tenant_id == Tenant.id)
+        .where(Tenant.id == company_id)
+    )
+    tenant, plan_name, user_count, job_count = row.one()
+    return PlatformCompanyOut(
+        id=tenant.id,
+        name=tenant.name,
+        slug=tenant.slug,
+        status=tenant.status,
+        region=tenant.region,
+        payment_provider=tenant.payment_provider,
+        plan_name=plan_name,
+        created_at=tenant.created_at,
+        user_count=user_count or 0,
+        job_count=job_count or 0,
+    )
+
+
 @router.get("/jobs", response_model=Page[PlatformJobOut])
 async def list_jobs(
     admin: CurrentPlatformAdmin,
@@ -249,6 +333,42 @@ async def list_jobs(
         for job, tenant_name, application_count in rows.all()
     ]
     return Page[PlatformJobOut](items=items, total=int(total), limit=limit, offset=offset)
+
+
+@router.patch("/jobs/{job_id}", response_model=PlatformJobOut)
+async def update_job_status(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    job_id: uuid.UUID,
+    payload: PlatformJobStatusUpdate,
+) -> PlatformJobOut:
+    job = await session.scalar(select(Job).where(Job.id == job_id))
+    if job is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="job not found"
+        )
+
+    await set_tenant_context(session, job.tenant_id)
+    job.status = payload.status
+    await session.flush()
+
+    tenant_name = await session.scalar(select(Tenant.name).where(Tenant.id == job.tenant_id))
+    app_count = (
+        await session.scalar(
+            select(func.count()).select_from(Application).where(Application.job_id == job.id)
+        )
+        or 0
+    )
+
+    return PlatformJobOut(
+        id=job.id,
+        title=job.title,
+        status=job.status,
+        created_at=job.created_at,
+        tenant_id=job.tenant_id,
+        tenant_name=tenant_name or "",
+        application_count=app_count,
+    )
 
 
 @router.get("/billing", response_model=Page[PlatformInvoiceOut])

@@ -1,7 +1,7 @@
 import { Users } from "lucide-react";
 import type { Metadata } from "next";
 
-import { Badge } from "@/components/ui/badge";
+import { UserRoleSelect, UserVerificationToggle } from "@/components/platform/user-status-select";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
@@ -51,11 +51,11 @@ export default async function PlatformUsersPage({
                       <p className="text-dim">{user.tenant_name}</p>
                       <CopyableId id={user.tenant_id} label="Company ID" />
                     </Td>
-                    <Td className="capitalize text-dim">{user.role}</Td>
                     <Td>
-                      <Badge tone={user.email_verified ? "success" : "neutral"}>
-                        {user.email_verified ? "Verified" : "Unverified"}
-                      </Badge>
+                      <UserRoleSelect userId={user.id} currentRole={user.role} />
+                    </Td>
+                    <Td>
+                      <UserVerificationToggle userId={user.id} currentVerified={user.email_verified} />
                     </Td>
                     <Td className="text-right text-xs text-dim">{formatDate(user.created_at)}</Td>
                   </Tr>

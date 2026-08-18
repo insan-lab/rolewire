@@ -4,11 +4,30 @@ from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr, Field
 
 from app.schemas.common import ORMModel
 
 PLATFORM_TOKEN_TYPE = "bearer"
+
+CompanyStatus = Literal["active", "past_due", "suspended"]
+JobStatusType = Literal["draft", "published", "closed"]
+UserRoleType = Literal["admin", "member"]
+
+
+class PlatformCompanyStatusUpdate(BaseModel):
+    status: CompanyStatus
+
+
+class PlatformJobStatusUpdate(BaseModel):
+    status: JobStatusType
+
+
+class PlatformUserUpdate(BaseModel):
+    role: UserRoleType | None = None
+    email_verified: bool | None = None
 
 
 class PlatformLoginRequest(BaseModel):
