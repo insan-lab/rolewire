@@ -10,7 +10,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ApiError } from "@/lib/api/errors";
 import { api } from "@/lib/api/server";
 import type { OAuthStart } from "@/lib/api/types";
-import { getAppOrigin, isOAuthProvider } from "@/lib/env";
+import { getAppOrigin, isOAuthProvider, isOAuthProviderEnabled } from "@/lib/env";
 import { OAUTH_INTENT_COOKIE, intentCookieOptions } from "@/lib/oauth";
 
 function back(req: NextRequest, error: string): NextResponse {
@@ -19,7 +19,7 @@ function back(req: NextRequest, error: string): NextResponse {
 
 export async function POST(req: NextRequest, context: { params: Promise<{ provider: string }> }) {
   const { provider } = await context.params;
-  if (!isOAuthProvider(provider)) return back(req, "unknown_provider");
+  if (!isOAuthProvider(provider) || !isOAuthProviderEnabled(provider)) return back(req, "provider_not_configured");
 
   try {
     const start = await api<OAuthStart>(`/v1/admin/auth/oauth/${provider}/link`, {

@@ -103,6 +103,9 @@ def get_provider(name: str) -> ProviderConfig:
 
 def _credentials(provider: str) -> tuple[str, str]:
     settings = get_settings()
+    enabled = getattr(settings, f"oauth_{provider}_enable", True)
+    if not enabled:
+        raise OAuthError(f"{provider} oauth is disabled")
     client_id = getattr(settings, f"oauth_{provider}_client_id", "")
     client_secret = getattr(settings, f"oauth_{provider}_client_secret", "")
     if not client_id or not client_secret:

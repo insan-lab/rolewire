@@ -1,4 +1,4 @@
-import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
+import { ENABLED_OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
 
 const LABELS: Record<OAuthProvider, string> = {
   google: "Google",
@@ -13,19 +13,21 @@ const LABELS: Record<OAuthProvider, string> = {
  * provider URL and then redirects.
  */
 export function OAuthButtons({ intent }: { intent: "login" | "signup" }) {
+  if (ENABLED_OAUTH_PROVIDERS.length === 0) return null;
+
   return (
     <div className="grid grid-cols-2 gap-2">
-      {OAUTH_PROVIDERS.map((provider) => (
+      {ENABLED_OAUTH_PROVIDERS.map((provider) => (
         <a
           key={provider}
           href={`/api/auth/oauth/${provider}/start`}
-          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+          className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] px-3 text-sm font-medium text-paper transition-colors hover:bg-[var(--ink)]"
         >
           <ProviderMark provider={provider} />
           {LABELS[provider]}
         </a>
       ))}
-      <p className="col-span-2 text-xs text-zinc-500">
+      <p className="col-span-2 text-xs text-dim">
         {intent === "signup"
           ? "Signing up with a provider creates your company account with that email."
           : "Use the provider you signed up with, or link more later in account settings."}

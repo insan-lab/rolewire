@@ -47,6 +47,25 @@ export function isOAuthProvider(value: string): value is OAuthProvider {
   return (OAUTH_PROVIDERS as readonly string[]).includes(value);
 }
 
+function parseBoolEnv(val: string | undefined, defaultVal = true): boolean {
+  if (val === undefined || val === null || val === "") return defaultVal;
+  const normalized = val.trim().toLowerCase();
+  return normalized === "true" || normalized === "1" || normalized === "yes";
+}
+
+export const OAUTH_ENABLE_MAP: Record<OAuthProvider, boolean> = {
+  google: parseBoolEnv(process.env.NEXT_PUBLIC_OAUTH_GOOGLE_ENABLE ?? process.env.OAUTH_GOOGLE_ENABLE, true),
+  github: parseBoolEnv(process.env.NEXT_PUBLIC_OAUTH_GITHUB_ENABLE ?? process.env.OAUTH_GITHUB_ENABLE, true),
+  facebook: parseBoolEnv(process.env.NEXT_PUBLIC_OAUTH_FACEBOOK_ENABLE ?? process.env.OAUTH_FACEBOOK_ENABLE, true),
+  linkedin: parseBoolEnv(process.env.NEXT_PUBLIC_OAUTH_LINKEDIN_ENABLE ?? process.env.OAUTH_LINKEDIN_ENABLE, true),
+};
+
+export function isOAuthProviderEnabled(provider: OAuthProvider): boolean {
+  return OAUTH_ENABLE_MAP[provider] ?? true;
+}
+
+export const ENABLED_OAUTH_PROVIDERS = OAUTH_PROVIDERS.filter(isOAuthProviderEnabled);
+
 /**
  * Safely resolves the public origin of incoming server requests, handling reverse proxies,
  * NEXT_PUBLIC_APP_URL, Host / X-Forwarded-Host headers, and avoiding internal 0.0.0.0 bind IPs.

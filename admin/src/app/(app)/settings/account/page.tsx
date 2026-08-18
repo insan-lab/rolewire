@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, CardBody, CardHeader, Callout, PageHeader } from "@/components/ui/surface";
 import { getCurrentUser } from "@/lib/api/server";
-import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
+import { ENABLED_OAUTH_PROVIDERS, OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Account" };
 
@@ -106,7 +106,7 @@ export default async function AccountSettingsPage({
             description="Add more ways to sign in, or remove ones you no longer use."
           />
           <ul className="divide-y divide-[var(--line-soft)]">
-            {OAUTH_PROVIDERS.map((provider) => {
+            {OAUTH_PROVIDERS.filter((provider) => ENABLED_OAUTH_PROVIDERS.includes(provider) || linkedSet.has(provider)).map((provider) => {
               const isLinked = linkedSet.has(provider);
               const onlyLoginMethod = isLinked && !user.has_password && linkedSet.size === 1;
               return (

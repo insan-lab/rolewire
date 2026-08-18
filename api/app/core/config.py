@@ -82,12 +82,16 @@ class Settings(BaseSettings):
     # Days a subscription may stay past_due before the tenant is suspended (§9.4).
     grace_period_days: int = 5
 
+    oauth_google_enable: bool = True
     oauth_google_client_id: str = ""
     oauth_google_client_secret: str = ""
+    oauth_github_enable: bool = True
     oauth_github_client_id: str = ""
     oauth_github_client_secret: str = ""
+    oauth_facebook_enable: bool = True
     oauth_facebook_client_id: str = ""
     oauth_facebook_client_secret: str = ""
+    oauth_linkedin_enable: bool = True
     oauth_linkedin_client_id: str = ""
     oauth_linkedin_client_secret: str = ""
     oauth_redirect_base_url: str = "http://localhost:8000"

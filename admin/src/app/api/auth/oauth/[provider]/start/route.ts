@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ApiError } from "@/lib/api/errors";
 import { request } from "@/lib/api/fetch";
 import type { OAuthStart } from "@/lib/api/types";
-import { getAppOrigin, isOAuthProvider } from "@/lib/env";
+import { getAppOrigin, isOAuthProvider, isOAuthProviderEnabled } from "@/lib/env";
 import { OAUTH_INTENT_COOKIE, intentCookieOptions } from "@/lib/oauth";
 
 export async function GET(
@@ -16,8 +16,8 @@ export async function GET(
 ) {
   const { provider } = await context.params;
   const origin = getAppOrigin(req);
-  if (!isOAuthProvider(provider)) {
-    return NextResponse.redirect(new URL("/login?error=unknown_provider", origin));
+  if (!isOAuthProvider(provider) || !isOAuthProviderEnabled(provider)) {
+    return NextResponse.redirect(new URL("/login?error=provider_not_configured", origin));
   }
 
   try {
