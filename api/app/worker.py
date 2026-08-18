@@ -22,6 +22,7 @@ RETRY_DELAYS = (60, 300, 1800)
 
 async def forward_application(ctx: dict[str, Any], application_id: str, tenant_id: str) -> str:
     """Forward a received application to the tenant's ATS webhook."""
+    delivery_error: dispatch.DeliveryError | None = None
     async with tenant_session(UUID(tenant_id)) as session:
         application = await session.scalar(
             select(Application).where(Application.id == UUID(application_id))
@@ -50,11 +51,16 @@ async def forward_application(ctx: dict[str, Any], application_id: str, tenant_i
         )
         try:
             await dispatch.deliver(url=job.ats_webhook_url, payload=payload)
+            application.status = "forwarded"
         except dispatch.DeliveryError as exc:
+            # Persist the failure before re-raising: raising inside the session would roll the
+            # status change back, leaving no trace of the failed delivery.
             application.status = "failed"
+            delivery_error = exc
             logger.warning("ats delivery failed for %s: %s", application_id, exc)
-            raise
-        application.status = "forwarded"
+
+    if delivery_error is not None:
+        raise delivery_error  # arq retries with backoff
     return "forwarded"
 
 
