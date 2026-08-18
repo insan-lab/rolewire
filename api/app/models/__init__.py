@@ -153,6 +153,7 @@ class User(Base):
     oauth_accounts: Mapped[list[OAuthAccount]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
+    tenant: Mapped[Tenant] = relationship(lazy="selectin")
 
 
 class OAuthAccount(Base):

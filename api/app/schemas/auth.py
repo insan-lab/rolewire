@@ -40,6 +40,8 @@ class OAuthAccountOut(ORMModel):
 class UserOut(ORMModel):
     id: UUID
     tenant_id: UUID
+    company_name: str | None = None
+    company_slug: str | None = None
     email: EmailStr
     email_verified: bool
     avatar_url: str | None

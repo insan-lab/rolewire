@@ -76,10 +76,19 @@ export default async function AccountSettingsPage({
 
         <Card>
           <CardHeader
-            title="System Identifiers"
-            description="Unique UUIDs for API integrations, webhooks, and technical support."
+            title="Company & System Identifiers"
+            description="Your organization name and unique UUIDs for API integrations and technical support."
           />
           <CardBody className="grid gap-4 sm:grid-cols-2">
+            {user.company_name ? (
+              <div className="sm:col-span-2">
+                <p className="mb-1 text-xs text-dim">Company Name</p>
+                <p className="text-base font-semibold text-paper">{user.company_name}</p>
+                {user.company_slug ? (
+                  <p className="font-mono text-xs text-dim">Slug: {user.company_slug}</p>
+                ) : null}
+              </div>
+            ) : null}
             <div>
               <p className="mb-1.5 font-mono text-xs text-dim">User ID (UUID)</p>
               <CopyableId id={user.id} label="User ID" />

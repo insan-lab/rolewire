@@ -7,7 +7,10 @@ import type { components } from "./generated";
 type Schemas = components["schemas"];
 
 export type TokenPair = Schemas["TokenPair"];
-export type User = Schemas["UserOut"];
+export type User = Schemas["UserOut"] & {
+  company_name?: string | null;
+  company_slug?: string | null;
+};
 export type OAuthStart = Schemas["OAuthStartOut"];
 
 export type Job = Schemas["JobOut"];

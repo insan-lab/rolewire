@@ -32,7 +32,15 @@ const SETTINGS: NavItem[] = [
   { href: "/settings/account", label: "Account", icon: <Settings className="size-4" /> },
 ];
 
-export function Sidebar({ userEmail, role }: { userEmail: string; role: string }) {
+export function Sidebar({
+  userEmail,
+  role,
+  companyName,
+}: {
+  userEmail: string;
+  role: string;
+  companyName?: string | null;
+}) {
   return (
     <nav
       aria-label="Sections"
@@ -40,7 +48,7 @@ export function Sidebar({ userEmail, role }: { userEmail: string; role: string }
       style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
     >
       <div
-        className="flex h-14 items-center gap-2 border-b px-4"
+        className="flex h-14 items-center justify-between gap-2 border-b px-4"
         style={{ borderColor: "var(--line-soft)" }}
       >
         <Link
@@ -50,6 +58,11 @@ export function Sidebar({ userEmail, role }: { userEmail: string; role: string }
           <span aria-hidden className="size-2 rounded-full bg-copper-bright" />
           Rolewire
         </Link>
+        {companyName ? (
+          <span className="truncate font-mono text-[0.7rem] text-dim max-w-[80px]" title={companyName}>
+            {companyName}
+          </span>
+        ) : null}
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-3">
@@ -61,6 +74,11 @@ export function Sidebar({ userEmail, role }: { userEmail: string; role: string }
       </div>
 
       <div className="border-t px-4 py-3" style={{ borderColor: "var(--line-soft)" }}>
+        {companyName ? (
+          <p className="truncate text-xs font-medium text-copper-bright" title={companyName}>
+            {companyName}
+          </p>
+        ) : null}
         <p className="truncate text-xs font-medium text-paper" title={userEmail}>
           {userEmail}
         </p>

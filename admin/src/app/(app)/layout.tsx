@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-dvh bg-ink">
-      <Sidebar userEmail={user.email} role={user.role} />
+      <Sidebar userEmail={user.email} role={user.role} companyName={user.company_name} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar user={user} docsUrl={`${PUBLIC_API_URL}/docs`} />
         <MobileNav />

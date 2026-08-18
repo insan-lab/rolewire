@@ -47,6 +47,8 @@ def _user_out(user: User, providers: list[str]) -> UserOut:
     return UserOut(
         id=user.id,
         tenant_id=user.tenant_id,
+        company_name=user.tenant.name if getattr(user, "tenant", None) else None,
+        company_slug=user.tenant.slug if getattr(user, "tenant", None) else None,
         email=user.email,
         email_verified=user.email_verified,
         avatar_url=user.avatar_url,
