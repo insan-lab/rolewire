@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
 
   return (
-    <div className="flex min-h-dvh bg-zinc-50">
+    <div className="flex min-h-dvh bg-ink">
       <Sidebar userEmail={user.email} role={user.role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar user={user} docsUrl={`${PUBLIC_API_URL}/docs`} />

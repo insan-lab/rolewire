@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, type ReactNode } from "react";
 
 import { ToastProvider } from "@/components/ui/toast";
+import { ThemeProvider } from "@/components/ui/theme-toggle";
 
 /**
  * Client-side providers. TanStack Query only backs the genuinely interactive views (applications
@@ -29,8 +30,10 @@ export function Providers({ children }: { children: ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>{children}</ToastProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>{children}</ToastProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const OVERLAY =
-  "fixed inset-0 z-40 bg-zinc-900/25 data-[state=open]:animate-fade-in";
+  "fixed inset-0 z-40 bg-black/50 data-[state=open]:animate-fade-in";
 
 /** Centered modal for short, focused confirmations and forms. */
 export function Dialog({
@@ -30,28 +30,39 @@ export function Dialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={OVERLAY} />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-zinc-200 bg-white shadow-overlay data-[state=open]:animate-slide-up">
-          <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-4 py-3">
+        <DialogPrimitive.Content
+          className="fixed left-1/2 top-1/2 z-50 w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border shadow-overlay data-[state=open]:animate-slide-up"
+          style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+        >
+          <div
+            className="flex items-start justify-between gap-4 border-b px-4 py-3"
+            style={{ borderColor: "var(--line-soft)" }}
+          >
             <div className="space-y-1">
-              <DialogPrimitive.Title className="text-sm font-semibold text-zinc-900">
+              <DialogPrimitive.Title className="text-sm font-semibold text-paper">
                 {title}
               </DialogPrimitive.Title>
               {description ? (
-                <DialogPrimitive.Description className="text-xs text-zinc-500">
+                <DialogPrimitive.Description className="text-xs text-dim">
                   {description}
                 </DialogPrimitive.Description>
               ) : null}
             </div>
             <DialogPrimitive.Close
-              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              className="rounded p-1 text-dim transition-colors hover:bg-[var(--ink)] hover:text-paper"
               aria-label="Close"
             >
               <X className="size-4" />
             </DialogPrimitive.Close>
           </div>
-          {children ? <div className="px-4 py-3 text-sm text-zinc-700">{children}</div> : null}
+          {children ? <div className="px-4 py-3 text-sm text-dim">{children}</div> : null}
           {footer ? (
-            <div className="flex justify-end gap-2 border-t border-zinc-200 px-4 py-3">{footer}</div>
+            <div
+              className="flex justify-end gap-2 border-t px-4 py-3"
+              style={{ borderColor: "var(--line-soft)" }}
+            >
+              {footer}
+            </div>
           ) : null}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -82,20 +93,26 @@ export function Drawer({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className={OVERLAY} />
-        <DialogPrimitive.Content className="fixed right-0 top-0 z-50 flex h-full w-[min(34rem,100vw)] flex-col border-l border-zinc-200 bg-white shadow-overlay data-[state=open]:animate-slide-in-right">
-          <div className="flex items-start justify-between gap-4 border-b border-zinc-200 px-4 py-3">
+        <DialogPrimitive.Content
+          className="fixed right-0 top-0 z-50 flex h-full w-[min(34rem,100vw)] flex-col border-l shadow-overlay data-[state=open]:animate-slide-in-right"
+          style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+        >
+          <div
+            className="flex items-start justify-between gap-4 border-b px-4 py-3"
+            style={{ borderColor: "var(--line-soft)" }}
+          >
             <div className="min-w-0 space-y-1">
-              <DialogPrimitive.Title className="truncate text-sm font-semibold text-zinc-900">
+              <DialogPrimitive.Title className="truncate text-sm font-semibold text-paper">
                 {title}
               </DialogPrimitive.Title>
               {description ? (
-                <DialogPrimitive.Description className="text-xs text-zinc-500">
+                <DialogPrimitive.Description className="text-xs text-dim">
                   {description}
                 </DialogPrimitive.Description>
               ) : null}
             </div>
             <DialogPrimitive.Close
-              className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+              className="rounded p-1 text-dim transition-colors hover:bg-[var(--ink)] hover:text-paper"
               aria-label="Close"
             >
               <X className="size-4" />
@@ -103,7 +120,12 @@ export function Drawer({
           </div>
           <div className="flex-1 overflow-y-auto px-4 py-3">{children}</div>
           {footer ? (
-            <div className="flex justify-end gap-2 border-t border-zinc-200 px-4 py-3">{footer}</div>
+            <div
+              className="flex justify-end gap-2 border-t px-4 py-3"
+              style={{ borderColor: "var(--line-soft)" }}
+            >
+              {footer}
+            </div>
           ) : null}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
@@ -127,7 +149,8 @@ export function DropdownMenu({
         <DropdownPrimitive.Content
           align={align}
           sideOffset={6}
-          className="z-50 min-w-44 rounded-md border border-zinc-200 bg-white p-1 shadow-overlay data-[state=open]:animate-slide-up"
+          className="z-50 min-w-44 rounded-md border p-1 shadow-overlay data-[state=open]:animate-slide-up"
+          style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
         >
           {children}
         </DropdownPrimitive.Content>
@@ -152,9 +175,11 @@ export function DropdownItem({
       disabled={disabled}
       onSelect={onSelect}
       className={cn(
-        "flex cursor-pointer select-none items-center gap-2 rounded px-2 py-1.5 text-sm outline-none",
-        destructive ? "text-red-700 data-[highlighted]:bg-red-50" : "text-zinc-700 data-[highlighted]:bg-zinc-100",
-        "data-[disabled]:cursor-not-allowed data-[disabled]:text-zinc-400",
+        "flex cursor-pointer select-none items-center gap-2 rounded px-2 py-1.5 text-sm outline-none transition-colors",
+        destructive
+          ? "text-red-400 data-[highlighted]:bg-red-500/10"
+          : "text-dim data-[highlighted]:bg-[var(--ink)] data-[highlighted]:text-paper",
+        "data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40",
       )}
     >
       {children}
@@ -163,5 +188,8 @@ export function DropdownItem({
 }
 
 export const DropdownSeparator = () => (
-  <DropdownPrimitive.Separator className="my-1 h-px bg-zinc-200" />
+  <DropdownPrimitive.Separator
+    className="my-1 h-px"
+    style={{ background: "var(--line-soft)" }}
+  />
 );

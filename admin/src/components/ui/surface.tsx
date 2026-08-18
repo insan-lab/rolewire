@@ -12,7 +12,10 @@ export function Card({
   as?: "section" | "div" | "article" | "li";
 }) {
   return (
-    <Element className={cn("rounded-lg border border-zinc-200 bg-white shadow-card", className)}>
+    <Element
+      className={cn("rounded-lg border shadow-card", className)}
+      style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+    >
       {children}
     </Element>
   );
@@ -32,13 +35,14 @@ export function CardHeader({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200 px-4 py-3",
+        "flex flex-wrap items-start justify-between gap-3 border-b px-4 py-3",
         className,
       )}
+      style={{ borderColor: "var(--line-soft)" }}
     >
       <div className="space-y-0.5">
-        <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
-        {description ? <p className="text-xs text-zinc-500">{description}</p> : null}
+        <h2 className="text-sm font-semibold text-paper">{title}</h2>
+        {description ? <p className="text-xs text-dim">{description}</p> : null}
       </div>
       {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
     </div>
@@ -64,8 +68,10 @@ export function PageHeader({
     <header className="mb-5 flex flex-wrap items-end justify-between gap-4">
       <div className="min-w-0 space-y-1">
         {breadcrumb}
-        <h1 className="truncate text-lg font-semibold tracking-tight text-zinc-900">{title}</h1>
-        {description ? <p className="max-w-2xl text-sm text-zinc-500">{description}</p> : null}
+        <h1 className="truncate font-display text-lg font-semibold tracking-tight text-paper">
+          {title}
+        </h1>
+        {description ? <p className="max-w-2xl text-sm text-dim">{description}</p> : null}
       </div>
       {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
     </header>
@@ -88,20 +94,20 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center gap-2 px-6 py-14 text-center">
-      {icon ? <div className="mb-1 text-zinc-400">{icon}</div> : null}
-      <p className="text-sm font-medium text-zinc-900">{title}</p>
-      <p className="max-w-md text-sm text-zinc-500">{body}</p>
+      {icon ? <div className="mb-1 text-dim">{icon}</div> : null}
+      <p className="text-sm font-medium text-paper">{title}</p>
+      <p className="max-w-md text-sm text-dim">{body}</p>
       {action ? <div className="mt-3">{action}</div> : null}
     </div>
   );
 }
 
 const CALLOUT_TONES = {
-  neutral: "border-zinc-200 bg-zinc-50 text-zinc-700",
-  info: "border-accent-200 bg-accent-50 text-accent-900",
-  warning: "border-amber-200 bg-amber-50 text-amber-900",
-  danger: "border-red-200 bg-red-50 text-red-800",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  neutral: { border: "var(--line-soft)", bg: "var(--ink-soft)", text: "var(--text-dim)" },
+  info: { border: "var(--copper)", bg: "rgba(192,122,62,0.08)", text: "var(--copper-bright)" },
+  warning: { border: "#92400e55", bg: "rgba(146,64,14,0.08)", text: "#fbbf24" },
+  danger: { border: "#991b1b55", bg: "rgba(153,27,27,0.08)", text: "#f87171" },
+  success: { border: "var(--signal)", bg: "rgba(127,174,122,0.08)", text: "var(--signal)" },
 } as const;
 
 export function Callout({
@@ -115,8 +121,12 @@ export function Callout({
   children?: ReactNode;
   className?: string;
 }) {
+  const t = CALLOUT_TONES[tone];
   return (
-    <div className={cn("rounded-md border px-3 py-2.5 text-sm", CALLOUT_TONES[tone], className)}>
+    <div
+      className={cn("rounded-md border px-3 py-2.5 text-sm", className)}
+      style={{ borderColor: t.border, background: t.bg, color: t.text }}
+    >
       {title ? <p className="font-medium">{title}</p> : null}
       {children ? <div className={cn(title && "mt-1 text-[0.8125rem] opacity-90")}>{children}</div> : null}
     </div>
@@ -134,9 +144,9 @@ export function Stat({
 }) {
   return (
     <div className="space-y-1 px-4 py-3">
-      <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">{label}</p>
-      <p className="text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
-      {hint ? <p className="text-xs text-zinc-500">{hint}</p> : null}
+      <p className="font-mono text-xs font-medium uppercase tracking-wide text-dim">{label}</p>
+      <p className="text-2xl font-semibold tracking-tight text-paper">{value}</p>
+      {hint ? <p className="text-xs text-dim">{hint}</p> : null}
     </div>
   );
 }

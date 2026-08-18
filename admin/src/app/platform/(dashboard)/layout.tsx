@@ -16,7 +16,7 @@ export default async function PlatformDashboardLayout({ children }: { children: 
   const admin = await requirePlatformAdmin();
 
   return (
-    <div className="flex min-h-dvh bg-zinc-50">
+    <div className="flex min-h-dvh bg-ink">
       <PlatformSidebar adminEmail={admin.email} />
       <main id="main" className="flex-1 px-4 py-6 sm:px-6">
         <div className="mx-auto max-w-6xl">{children}</div>

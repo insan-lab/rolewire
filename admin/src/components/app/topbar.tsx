@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { LinkButton } from "@/components/ui/button";
 import { DropdownItem, DropdownMenu, DropdownSeparator } from "@/components/ui/overlay";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { User } from "@/lib/api/types";
 
 export function Topbar({ user, docsUrl }: { user: User; docsUrl: string }) {
@@ -19,34 +20,43 @@ export function Topbar({ user, docsUrl }: { user: User; docsUrl: string }) {
   }
 
   return (
-    <header className="flex h-14 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4">
+    <header
+      className="flex h-14 items-center justify-between gap-4 border-b px-4"
+      style={{ background: "var(--ink-soft)", borderColor: "var(--line-soft)" }}
+    >
       <div className="min-w-0">
-        <p className="truncate text-sm font-medium text-zinc-800 lg:hidden">Rolewire</p>
+        <p className="truncate font-mono text-sm font-medium text-paper lg:hidden">Rolewire</p>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <LinkButton href="/jobs/new" size="sm" icon={<Plus className="size-4" />}>
           New job
         </LinkButton>
+
+        {/* Theme toggle */}
+        <ThemeToggle />
 
         <DropdownMenu
           trigger={
             <button
               type="button"
-              className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-zinc-700 hover:bg-zinc-100"
+              className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-sm text-dim transition-colors hover:bg-[var(--ink)] hover:text-paper"
               aria-label="Account menu"
             >
-              <span className="grid size-6 place-items-center rounded-full bg-zinc-200 text-xs font-medium text-zinc-700">
+              <span
+                className="grid size-6 place-items-center rounded-full font-mono text-xs font-medium text-ink"
+                style={{ backgroundColor: "var(--copper-bright)" }}
+              >
                 {user.email.slice(0, 1).toUpperCase()}
               </span>
               <span className="hidden max-w-40 truncate sm:block">{user.email}</span>
-              <ChevronDown className="size-3.5 text-zinc-400" />
+              <ChevronDown className="size-3.5 text-dim" />
             </button>
           }
         >
           <div className="px-2 py-1.5">
-            <p className="truncate text-sm font-medium text-zinc-900">{user.email}</p>
-            <p className="text-xs capitalize text-zinc-500">{user.role}</p>
+            <p className="truncate text-sm font-medium text-paper">{user.email}</p>
+            <p className="font-mono text-xs capitalize text-dim">{user.role}</p>
           </div>
           <DropdownSeparator />
           <DropdownItem>
