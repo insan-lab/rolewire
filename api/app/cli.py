@@ -69,7 +69,7 @@ async def list_plans() -> None:
     async with get_sessionmaker()() as session:
         for plan in await session.scalars(select(Plan).order_by(Plan.monthly_price_usd)):
             print(
-                f"{plan.name:8} ${plan.monthly_price_usd}/mo  ৳{plan.monthly_price_bdt}/mo  "
+                f"{plan.name:8} USD {plan.monthly_price_usd}/mo  BDT {plan.monthly_price_bdt}/mo  "
                 f"paddle_monthly={plan.paddle_monthly_price_id or '-'}"
             )
     await dispose_engine()

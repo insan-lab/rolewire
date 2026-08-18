@@ -24,7 +24,7 @@ Full design: [`docs/spec.md`](docs/spec.md). This README covers what is built an
 ```bash
 uv pip install -e ".[dev]"     # or: make install
 cp .env.example .env           # fill JWT_SECRET, ENCRYPTION_KEY, IP_HASH_SALT
-make test                      # 78 tests, no external services needed
+make test                      # 95 tests, no external services needed
 ```
 
 Generate the two cryptographic values:
@@ -171,7 +171,7 @@ api/
     worker.py   arq tasks + cron
     cli.py      seed-plans, list-plans, generate-encryption-key
   alembic/      migrations (0001 = schema + RLS)
-  tests/        78 tests; Postgres RLS suite skips unless ROLEWIRE_TEST_PG_URL is set
+  tests/        95 tests + 6 Postgres RLS tests that skip unless ROLEWIRE_TEST_PG_URL is set
 nginx/          reverse proxy config
 postgres/init/  least-privilege app role bootstrap
 ```
