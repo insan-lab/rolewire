@@ -28,7 +28,11 @@ RUN corepack enable && pnpm build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
+# Docker sets HOSTNAME to the container id and maps it to 127.0.0.1 in /etc/hosts; Next's
+# standalone server.js binds to process.env.HOSTNAME if set, so it'd listen on loopback only
+# and be unreachable from other containers (e.g. nginx) without this override.
+ENV NODE_ENV=production \
+    HOSTNAME=0.0.0.0
 
 RUN addgroup --system --gid 10001 rolewire && adduser --system --uid 10001 --ingroup rolewire rolewire
 
