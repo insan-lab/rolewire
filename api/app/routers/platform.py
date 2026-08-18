@@ -21,9 +21,20 @@ from app.core.security import (
     decode_token,
     verify_password,
 )
-from app.models import Application, Invoice, Job, Plan, PlatformAdmin, Subscription, Tenant, User
+from app.models import (
+    Application,
+    ContactSubmission,
+    Invoice,
+    Job,
+    Plan,
+    PlatformAdmin,
+    Subscription,
+    Tenant,
+    User,
+)
 from app.routers.deps import CurrentPlatformAdmin, DbSession
 from app.schemas.common import Page
+from app.schemas.contact import ContactSubmissionOut, ContactSubmissionStatusUpdate
 from app.schemas.platform import (
     PlatformAdminOut,
     PlatformCompanyOut,
@@ -269,6 +280,58 @@ async def list_billing(
         for invoice, tenant_name in rows.all()
     ]
     return Page[PlatformInvoiceOut](items=items, total=int(total), limit=limit, offset=offset)
+
+
+@router.get("/contact-submissions", response_model=Page[ContactSubmissionOut])
+async def list_contact_submissions(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    status_filter: str | None = Query(default=None, alias="status"),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+) -> Page[ContactSubmissionOut]:
+    conditions = []
+    if status_filter:
+        conditions.append(ContactSubmission.status == status_filter)
+
+    total = (
+        await session.scalar(
+            select(func.count()).select_from(ContactSubmission).where(*conditions)
+        )
+        or 0
+    )
+    rows = await session.scalars(
+        select(ContactSubmission)
+        .where(*conditions)
+        .order_by(ContactSubmission.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    items = [
+        ContactSubmissionOut.model_validate(sub, from_attributes=True)
+        for sub in rows
+    ]
+    return Page[ContactSubmissionOut](items=items, total=int(total), limit=limit, offset=offset)
+
+
+@router.patch("/contact-submissions/{submission_id}", response_model=ContactSubmissionOut)
+async def update_contact_submission_status(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    submission_id: uuid.UUID,
+    payload: ContactSubmissionStatusUpdate,
+) -> ContactSubmissionOut:
+    submission = await session.scalar(
+        select(ContactSubmission).where(ContactSubmission.id == submission_id)
+    )
+    if submission is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="contact submission not found"
+        )
+
+    submission.status = payload.status
+    await session.flush()
+    return ContactSubmissionOut.model_validate(submission, from_attributes=True)
 
 
 __all__ = ["router"]

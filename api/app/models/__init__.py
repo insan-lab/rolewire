@@ -389,8 +389,32 @@ class Invoice(Base):
     )
 
 
+class ContactSubmission(Base):
+    """Contact page submissions stored from the public contact form."""
+
+    __tablename__ = "contact_submissions"
+
+    id: Mapped[uuid.UUID] = _pk()
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    email: Mapped[str] = mapped_column(Text, nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="pending", nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending','in_progress','resolved','ignored')",
+            name="contact_submissions_status_check",
+        ),
+        Index("ix_contact_submissions_created_at", "created_at"),
+        Index("ix_contact_submissions_status", "status"),
+    )
+
+
 __all__ = [
     "Application",
+    "ContactSubmission",
     "Invoice",
     "Job",
     "JobQuestion",

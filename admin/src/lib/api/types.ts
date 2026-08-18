@@ -142,3 +142,15 @@ export type PlatformInvoice = {
   tenant_id: string;
   tenant_name: string;
 };
+
+export type ContactSubmissionStatus = "pending" | "in_progress" | "resolved" | "ignored";
+
+export type PlatformContactSubmission = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  status: ContactSubmissionStatus;
+  created_at: string;
+  updated_at: string;
+};

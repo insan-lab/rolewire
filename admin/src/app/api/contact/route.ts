@@ -8,6 +8,7 @@
 import nodemailer from "nodemailer";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { request as requestBackend } from "@/lib/api/fetch";
 import { contactSchema } from "@/lib/validation";
 
 /**
@@ -57,47 +58,50 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const { name, email, message } = parsed.data;
+
+  // 1. Persist in database via backend API
+  try {
+    await requestBackend("/v1/public/contact", {
+      method: "POST",
+      body: { name, email, message },
+    });
+  } catch (err) {
+    console.error("Failed to store contact submission in backend DB", err);
+    return NextResponse.json(
+      { detail: "We could not save your message right now. Please try again later." },
+      { status: 502 },
+    );
+  }
+
+  // 2. Optionally send email via SMTP if configured
   const host = process.env.SMTP_HOST;
   const inbox = process.env.SUPPORT_INBOX_EMAIL;
   const sender = process.env.SMTP_FROM_EMAIL ?? inbox;
 
-  if (!host || !inbox || !sender) {
-    // Fail loudly in the server log, politely in the UI: the page also shows a mailto fallback.
-    console.error("contact form is not configured (SMTP_HOST / SUPPORT_INBOX_EMAIL missing)");
-    return NextResponse.json(
-      { detail: "The contact form is not available right now — please email us directly." },
-      { status: 503 },
-    );
-  }
-
-  const { name, email, message } = parsed.data;
-
-  const transport = nodemailer.createTransport({
-    host,
-    port: Number(process.env.SMTP_PORT ?? 587),
-    secure: false,
-    requireTLS: (process.env.SMTP_USE_TLS ?? "true") !== "false",
-    auth: process.env.SMTP_USERNAME
-      ? { user: process.env.SMTP_USERNAME, pass: process.env.SMTP_PASSWORD }
-      : undefined,
-  });
-
-  try {
-    await transport.sendMail({
-      from: `"${process.env.SMTP_FROM_NAME ?? "Rolewire website"}" <${sender}>`,
-      to: inbox,
-      // Replies go to the person who wrote in, not to the sending identity.
-      replyTo: `"${name}" <${email}>`,
-      subject: `Contact form: ${name}`,
-      html: `<p><strong>${escapeHtml(name)}</strong> &lt;${escapeHtml(email)}&gt;</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
-      text: `${name} <${email}>\n\n${message}`,
+  if (host && inbox && sender) {
+    const transport = nodemailer.createTransport({
+      host,
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: false,
+      requireTLS: (process.env.SMTP_USE_TLS ?? "true") !== "false",
+      auth: process.env.SMTP_USERNAME
+        ? { user: process.env.SMTP_USERNAME, pass: process.env.SMTP_PASSWORD }
+        : undefined,
     });
-  } catch (error) {
-    console.error("smtp send failed", error);
-    return NextResponse.json(
-      { detail: "We could not send that message. Please email us directly." },
-      { status: 502 },
-    );
+
+    try {
+      await transport.sendMail({
+        from: `"${process.env.SMTP_FROM_NAME ?? "Rolewire website"}" <${sender}>`,
+        to: inbox,
+        replyTo: `"${name}" <${email}>`,
+        subject: `Contact form: ${name}`,
+        html: `<p><strong>${escapeHtml(name)}</strong> &lt;${escapeHtml(email)}&gt;</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
+        text: `${name} <${email}>\n\n${message}`,
+      });
+    } catch (error) {
+      console.error("smtp send failed (submission was saved in DB)", error);
+    }
   }
 
   return NextResponse.json({ ok: true }, { status: 202 });

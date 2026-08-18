@@ -21,8 +21,10 @@ async function handle(request: NextRequest, params: Promise<{ path?: string[] }>
 
   const search = request.nextUrl.search;
   const token = request.cookies.get(PLATFORM_ACCESS_COOKIE)?.value;
+  const method = request.method as "GET" | "POST" | "PATCH" | "DELETE";
+  const body = ["POST", "PATCH", "PUT"].includes(method) ? await request.json().catch(() => undefined) : undefined;
 
-  const send = (bearer: string | undefined) => rawRequest(`/${target}${search}`, { token: bearer });
+  const send = (bearer: string | undefined) => rawRequest(`/${target}${search}`, { method, body, token: bearer });
 
   let upstream: Response;
   try {
@@ -48,5 +50,13 @@ async function handle(request: NextRequest, params: Promise<{ path?: string[] }>
 type Context = { params: Promise<{ path?: string[] }> };
 
 export async function GET(request: NextRequest, context: Context) {
+  return handle(request, context.params);
+}
+
+export async function PATCH(request: NextRequest, context: Context) {
+  return handle(request, context.params);
+}
+
+export async function POST(request: NextRequest, context: Context) {
   return handle(request, context.params);
 }

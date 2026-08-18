@@ -29,8 +29,9 @@ from app.core.config import get_settings
 from app.core.crypto import hash_ip
 from app.core.db import get_db, set_public_context, set_tenant_context
 from app.core.rate_limit import hit
-from app.models import Application, Job, StorageConfig, Tenant
+from app.models import Application, ContactSubmission, Job, StorageConfig, Tenant
 from app.routers.deps import client_ip
+from app.schemas.contact import ContactSubmissionCreate, ContactSubmissionOut
 from app.schemas.jobs import (
     ApplicationAccepted,
     ApplicationSubmit,
@@ -339,3 +340,34 @@ def _email_from_answers(job: Job, cleaned: dict[str, object]) -> str | None:
         if question.question_type == "email" and cleaned.get(question.field_key):
             return str(cleaned[question.field_key])
     return None
+
+
+@router.post(
+    "/contact",
+    response_model=ContactSubmissionOut,
+    status_code=status.HTTP_201_CREATED,
+    summary="Submit a contact form inquiry",
+)
+async def create_contact_submission(
+    request: Request,
+    payload: ContactSubmissionCreate,
+    session: DbSession,
+) -> ContactSubmissionOut:
+    ip_digest = hash_ip(client_ip(request))
+    await _rate_limit(
+        request,
+        key=f"public:contact:{ip_digest}",
+        limit=5,
+        window=600,
+    )
+    submission = ContactSubmission(
+        id=uuid.uuid4(),
+        name=payload.name,
+        email=payload.email,
+        message=payload.message,
+        status="pending",
+    )
+    session.add(submission)
+    await session.flush()
+    return ContactSubmissionOut.model_validate(submission, from_attributes=True)
+

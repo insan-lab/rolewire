@@ -1,6 +1,6 @@
 "use client";
 
-import { Briefcase, Building2, CreditCard, LayoutDashboard, LogOut, Users } from "lucide-react";
+import { Briefcase, Building2, CreditCard, LayoutDashboard, LogOut, Mail, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -16,6 +16,7 @@ const NAV: NavItem[] = [
   { href: "/platform/users", label: "Users", icon: <Users className="size-4" /> },
   { href: "/platform/jobs", label: "Jobs", icon: <Briefcase className="size-4" /> },
   { href: "/platform/billing", label: "Billing", icon: <CreditCard className="size-4" /> },
+  { href: "/platform/contact", label: "Submissions", icon: <Mail className="size-4" /> },
 ];
 
 export function PlatformSidebar({ adminEmail }: { adminEmail: string }) {

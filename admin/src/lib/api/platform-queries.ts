@@ -3,8 +3,10 @@ import "server-only";
 /** Server-side read helpers for the platform-superadmin surface. Mirrors queries.ts. */
 import { platformApiRead } from "./platform-server";
 import type {
+  ContactSubmissionStatus,
   Page,
   PlatformCompany,
+  PlatformContactSubmission,
   PlatformInvoice,
   PlatformJob,
   PlatformStats,
@@ -45,5 +47,17 @@ export function listPlatformJobs(options: { limit?: number; offset?: number } = 
 export function listPlatformBilling(options: { limit?: number; offset?: number } = {}) {
   return platformApiRead<Page<PlatformInvoice>>(
     `/v1/admin/platform/billing${query({ limit: options.limit ?? 50, offset: options.offset })}`,
+  );
+}
+
+export function listPlatformContactSubmissions(
+  options: { limit?: number; offset?: number; status?: ContactSubmissionStatus } = {},
+) {
+  return platformApiRead<Page<PlatformContactSubmission>>(
+    `/v1/admin/platform/contact-submissions${query({
+      limit: options.limit ?? 50,
+      offset: options.offset,
+      status: options.status,
+    })}`,
   );
 }
