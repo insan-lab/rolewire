@@ -2,6 +2,7 @@ import { Users } from "lucide-react";
 import type { Metadata } from "next";
 
 import { Badge } from "@/components/ui/badge";
+import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
 import { listPlatformUsers } from "@/lib/api/platform-queries";
@@ -32,8 +33,8 @@ export default async function PlatformUsersPage({
             <Table caption="Users">
               <thead>
                 <tr>
-                  <Th>Email</Th>
-                  <Th>Company</Th>
+                  <Th>Email & User ID</Th>
+                  <Th>Company & ID</Th>
                   <Th>Role</Th>
                   <Th>Verified</Th>
                   <Th className="text-right">Created</Th>
@@ -42,8 +43,14 @@ export default async function PlatformUsersPage({
               <tbody>
                 {page.items.map((user) => (
                   <Tr key={user.id}>
-                    <Td className="font-medium text-paper">{user.email}</Td>
-                    <Td className="text-dim">{user.tenant_name}</Td>
+                    <Td>
+                      <p className="font-medium text-paper">{user.email}</p>
+                      <CopyableId id={user.id} label="User ID" />
+                    </Td>
+                    <Td>
+                      <p className="text-dim">{user.tenant_name}</p>
+                      <CopyableId id={user.tenant_id} label="Company ID" />
+                    </Td>
                     <Td className="capitalize text-dim">{user.role}</Td>
                     <Td>
                       <Badge tone={user.email_verified ? "success" : "neutral"}>

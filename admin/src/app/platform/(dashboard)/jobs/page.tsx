@@ -2,6 +2,7 @@ import { Briefcase } from "lucide-react";
 import type { Metadata } from "next";
 
 import { JobStatusBadge } from "@/components/ui/badge";
+import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
 import { listPlatformJobs } from "@/lib/api/platform-queries";
@@ -33,8 +34,8 @@ export default async function PlatformJobsPage({
             <Table caption="Jobs">
               <thead>
                 <tr>
-                  <Th>Title</Th>
-                  <Th>Company</Th>
+                  <Th>Title & Job ID</Th>
+                  <Th>Company & ID</Th>
                   <Th>Status</Th>
                   <Th className="text-right">Applications</Th>
                   <Th className="text-right">Created</Th>
@@ -43,8 +44,14 @@ export default async function PlatformJobsPage({
               <tbody>
                 {page.items.map((job) => (
                   <Tr key={job.id}>
-                    <Td className="font-medium text-paper">{job.title}</Td>
-                    <Td className="text-dim">{job.tenant_name}</Td>
+                    <Td>
+                      <p className="font-medium text-paper">{job.title}</p>
+                      <CopyableId id={job.id} label="Job ID" />
+                    </Td>
+                    <Td>
+                      <p className="text-dim">{job.tenant_name}</p>
+                      <CopyableId id={job.tenant_id} label="Company ID" />
+                    </Td>
                     <Td>
                       <JobStatusBadge status={job.status as JobStatus} />
                     </Td>

@@ -2,6 +2,7 @@ import { CreditCard } from "lucide-react";
 import type { Metadata } from "next";
 
 import { Badge, type BadgeTone } from "@/components/ui/badge";
+import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, EmptyState, PageHeader } from "@/components/ui/surface";
 import { Pagination, Table, Td, Th, Tr } from "@/components/ui/table";
 import { listPlatformBilling } from "@/lib/api/platform-queries";
@@ -38,7 +39,8 @@ export default async function PlatformBillingPage({
             <Table caption="Invoices">
               <thead>
                 <tr>
-                  <Th>Company</Th>
+                  <Th>Company & ID</Th>
+                  <Th>Invoice ID</Th>
                   <Th>Provider</Th>
                   <Th>Status</Th>
                   <Th className="text-right">Amount</Th>
@@ -48,7 +50,13 @@ export default async function PlatformBillingPage({
               <tbody>
                 {page.items.map((invoice) => (
                   <Tr key={invoice.id}>
-                    <Td className="font-medium text-paper">{invoice.tenant_name}</Td>
+                    <Td>
+                      <p className="font-medium text-paper">{invoice.tenant_name}</p>
+                      <CopyableId id={invoice.tenant_id} label="Company ID" />
+                    </Td>
+                    <Td>
+                      <CopyableId id={invoice.id} label="Invoice ID" />
+                    </Td>
                     <Td className="capitalize text-dim">{invoice.provider}</Td>
                     <Td>
                       <Badge tone={INVOICE_STATUS_TONE[invoice.status] ?? "neutral"}>

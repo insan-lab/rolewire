@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { UnlinkProviderButton } from "@/components/app/unlink-provider-button";
 import { Badge } from "@/components/ui/badge";
+import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, CardBody, CardHeader, Callout, PageHeader } from "@/components/ui/surface";
 import { getCurrentUser } from "@/lib/api/server";
 import { OAUTH_PROVIDERS, type OAuthProvider } from "@/lib/env";
@@ -70,6 +71,23 @@ export default async function AccountSettingsPage({
                 login by contacting support, or keep using the providers below.
               </Callout>
             )}
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader
+            title="System Identifiers"
+            description="Unique UUIDs for API integrations, webhooks, and technical support."
+          />
+          <CardBody className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="mb-1.5 font-mono text-xs text-dim">User ID (UUID)</p>
+              <CopyableId id={user.id} label="User ID" />
+            </div>
+            <div>
+              <p className="mb-1.5 font-mono text-xs text-dim">Company / Workspace ID (UUID)</p>
+              <CopyableId id={user.tenant_id} label="Company ID" />
+            </div>
           </CardBody>
         </Card>
 
