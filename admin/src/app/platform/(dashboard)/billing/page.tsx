@@ -48,17 +48,17 @@ export default async function PlatformBillingPage({
               <tbody>
                 {page.items.map((invoice) => (
                   <Tr key={invoice.id}>
-                    <Td className="font-medium text-zinc-900">{invoice.tenant_name}</Td>
-                    <Td className="capitalize text-zinc-600">{invoice.provider}</Td>
+                    <Td className="font-medium text-paper">{invoice.tenant_name}</Td>
+                    <Td className="capitalize text-dim">{invoice.provider}</Td>
                     <Td>
                       <Badge tone={INVOICE_STATUS_TONE[invoice.status] ?? "neutral"}>
                         {invoice.status}
                       </Badge>
                     </Td>
-                    <Td className="text-right text-zinc-600">
+                    <Td className="text-right text-dim">
                       {formatMoney(invoice.amount, invoice.currency)}
                     </Td>
-                    <Td className="text-right text-xs text-zinc-500">{formatDate(invoice.created_at)}</Td>
+                    <Td className="text-right text-xs text-dim">{formatDate(invoice.created_at)}</Td>
                   </Tr>
                 ))}
               </tbody>

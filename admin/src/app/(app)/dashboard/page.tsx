@@ -61,7 +61,7 @@ export default async function DashboardPage({
       ) : null}
 
       <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="divide-y divide-zinc-100">
+        <Card className="divide-y divide-[var(--line-soft)]">
           <Stat label="Published" value={published.total} hint="Visible on your career page" />
         </Card>
         <Card>
@@ -88,7 +88,7 @@ export default async function DashboardPage({
               recent.total > 0 ? (
                 <Link
                   href="/applications"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-accent-700 hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-copper-bright hover:underline"
                 >
                   Open inbox <ArrowUpRight className="size-3.5" />
                 </Link>
@@ -127,7 +127,7 @@ export default async function DashboardPage({
                     <Td>
                       <Link
                         href={`/applications/${application.id}`}
-                        className="font-medium text-zinc-900 hover:text-accent-700 hover:underline"
+                        className="font-medium text-paper hover:text-copper-bright hover:underline"
                       >
                         {applicantLabel(application)}
                       </Link>
@@ -135,7 +135,7 @@ export default async function DashboardPage({
                     <Td>
                       <ApplicationStatusBadge status={application.status} />
                     </Td>
-                    <Td className="text-right text-xs text-zinc-500">
+                    <Td className="text-right text-xs text-dim">
                       {relativeTime(application.created_at)}
                     </Td>
                   </Tr>
@@ -160,7 +160,7 @@ function PlanCard({ billing }: { billing: BillingOverview | null }) {
       <Card>
         <CardHeader title="Plan" />
         <CardBody>
-          <p className="text-sm text-zinc-500">Billing information is unavailable right now.</p>
+          <p className="text-sm text-dim">Billing information is unavailable right now.</p>
         </CardBody>
       </Card>
     );
@@ -177,10 +177,10 @@ function PlanCard({ billing }: { billing: BillingOverview | null }) {
       />
       <CardBody className="space-y-3">
         <div>
-          <p className="text-sm font-medium capitalize text-zinc-900">
+          <p className="text-sm font-medium capitalize text-paper">
             {billing.plan?.name ?? "No plan yet"}
           </p>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-dim">
             {billing.payment_provider
               ? `Billed through ${billing.payment_provider}`
               : "No payment method connected"}
@@ -188,15 +188,15 @@ function PlanCard({ billing }: { billing: BillingOverview | null }) {
         </div>
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <dt className="text-xs text-zinc-500">Hosted storage</dt>
-            <dd className="font-medium text-zinc-900">{formatBytesFromMb(storageMb)}</dd>
+            <dt className="text-xs text-dim">Hosted storage</dt>
+            <dd className="font-medium text-paper">{formatBytesFromMb(storageMb)}</dd>
           </div>
           <div>
-            <dt className="text-xs text-zinc-500">Applications metered</dt>
-            <dd className="font-medium text-zinc-900">{applications}</dd>
+            <dt className="text-xs text-dim">Applications metered</dt>
+            <dd className="font-medium text-paper">{applications}</dd>
           </div>
         </dl>
-        <Link href="/billing" className="inline-block text-xs font-medium text-accent-700 hover:underline">
+        <Link href="/billing" className="inline-block text-xs font-medium text-copper-bright hover:underline">
           Billing details
         </Link>
       </CardBody>
@@ -229,30 +229,30 @@ function NextSteps({ jobs, drafts }: { jobs: Page<Job>; drafts: Page<Job> }) {
   return (
     <Card>
       <CardHeader title="Getting set up" />
-      <ul className="divide-y divide-zinc-100">
+      <ul className="divide-y divide-[var(--line-soft)]">
         {steps.map((step) => (
           <li key={step.title} className="flex gap-3 px-4 py-3">
             <span
               aria-hidden
               className={
                 step.done
-                  ? "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-emerald-600 text-[0.6rem] text-white"
-                  : "mt-1 size-4 shrink-0 rounded-full border border-zinc-300"
+                  ? "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-[var(--signal)] text-[0.6rem] text-ink font-bold"
+                  : "mt-1 size-4 shrink-0 rounded-full border border-[var(--line-soft)]"
               }
             >
               {step.done ? "✓" : null}
             </span>
             <div className="min-w-0">
-              <Link href={step.href} className="text-sm font-medium text-zinc-900 hover:underline">
+              <Link href={step.href} className="text-sm font-medium text-paper hover:underline">
                 {step.title}
               </Link>
-              <p className="text-xs text-zinc-500">{step.body}</p>
+              <p className="text-xs text-dim">{step.body}</p>
             </div>
           </li>
         ))}
       </ul>
-      <CardBody className="border-t border-zinc-100 text-xs text-zinc-500">
-        <Briefcase className="mr-1 inline size-3.5 align-[-2px] text-zinc-400" />
+      <CardBody className="border-t border-[var(--line-soft)] text-xs text-dim">
+        <Briefcase className="mr-1 inline size-3.5 align-[-2px] text-dim" />
         Your career page reads two endpoints and posts to a third — no SDK required.
       </CardBody>
     </Card>

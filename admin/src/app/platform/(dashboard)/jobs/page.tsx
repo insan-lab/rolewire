@@ -43,15 +43,15 @@ export default async function PlatformJobsPage({
               <tbody>
                 {page.items.map((job) => (
                   <Tr key={job.id}>
-                    <Td className="font-medium text-zinc-900">{job.title}</Td>
-                    <Td className="text-zinc-600">{job.tenant_name}</Td>
+                    <Td className="font-medium text-paper">{job.title}</Td>
+                    <Td className="text-dim">{job.tenant_name}</Td>
                     <Td>
                       <JobStatusBadge status={job.status as JobStatus} />
                     </Td>
-                    <Td className="text-right text-zinc-600">
+                    <Td className="text-right text-dim">
                       {pluralize(job.application_count, "application")}
                     </Td>
-                    <Td className="text-right text-xs text-zinc-500">{formatDate(job.created_at)}</Td>
+                    <Td className="text-right text-xs text-dim">{formatDate(job.created_at)}</Td>
                   </Tr>
                 ))}
               </tbody>

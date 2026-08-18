@@ -80,8 +80,8 @@ export default async function JobsPage({
               aria-current={status === tab.value ? "true" : undefined}
               className={
                 status === tab.value
-                  ? "rounded-md bg-zinc-900 px-2.5 py-1 text-sm font-medium text-white"
-                  : "rounded-md px-2.5 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
+                  ? "rounded-md bg-copper-bright px-2.5 py-1 text-sm font-medium text-ink"
+                  : "rounded-md px-2.5 py-1 text-sm text-dim hover:bg-[var(--ink-soft)] hover:text-paper"
               }
             >
               {tab.label}
@@ -97,11 +97,11 @@ export default async function JobsPage({
             defaultValue={search}
             placeholder="Search title, location, department"
             aria-label="Search jobs"
-            className="h-8 w-64 rounded-md border border-zinc-300 px-2.5 text-sm placeholder:text-zinc-400"
+            className="h-8 w-64 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] px-2.5 text-sm text-paper placeholder:text-dim"
           />
           <button
             type="submit"
-            className="h-8 rounded-md border border-zinc-300 bg-white px-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
+            className="h-8 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] px-2.5 text-sm text-dim transition-colors hover:text-paper"
           >
             Search
           </button>
@@ -148,11 +148,11 @@ export default async function JobsPage({
                     <Td>
                       <Link
                         href={`/jobs/${job.id}`}
-                        className="font-medium text-zinc-900 hover:text-accent-700 hover:underline"
+                        className="font-medium text-paper hover:text-copper-bright hover:underline"
                       >
                         {job.title}
                       </Link>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-dim">
                         {[job.department, job.location, job.employment_type]
                           .filter(Boolean)
                           .join(" · ") || "No location set"}
@@ -161,15 +161,15 @@ export default async function JobsPage({
                     <Td>
                       <JobStatusBadge status={job.status as JobStatus} />
                     </Td>
-                    <Td className="text-zinc-600">{pluralize(job.questions.length, "question")}</Td>
-                    <Td className="text-zinc-600">{STORAGE_TARGET_LABELS[job.storage_target]}</Td>
-                    <Td className="text-right text-xs text-zinc-500">{formatDate(job.created_at)}</Td>
+                    <Td className="text-dim">{pluralize(job.questions.length, "question")}</Td>
+                    <Td className="text-dim">{STORAGE_TARGET_LABELS[job.storage_target]}</Td>
+                    <Td className="text-right text-xs text-dim">{formatDate(job.created_at)}</Td>
                   </Tr>
                 ))}
               </tbody>
             </Table>
             {search ? (
-              <p className="border-t border-zinc-200 px-3 py-2 text-xs text-zinc-500">
+              <p className="border-t border-[var(--line-soft)] px-3 py-2 font-mono text-xs text-dim">
                 Showing {jobs.length} of {page.total} jobs matching “{search}”.
               </p>
             ) : (

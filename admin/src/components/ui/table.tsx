@@ -27,7 +27,7 @@ export function Th({ children, className, ...props }: ThHTMLAttributes<HTMLTable
     <th
       scope="col"
       className={cn(
-        "sticky top-0 z-10 border-b border-zinc-200 bg-zinc-50 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500",
+        "sticky top-0 z-10 border-b border-[var(--line-soft)] bg-[var(--ink-soft)] px-3 py-2 text-left font-mono text-xs font-semibold uppercase tracking-wide text-dim",
         className,
       )}
       {...props}
@@ -39,7 +39,7 @@ export function Th({ children, className, ...props }: ThHTMLAttributes<HTMLTable
 
 export function Td({ children, className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={cn("border-b border-zinc-100 px-3 py-2 align-middle text-zinc-700", className)} {...props}>
+    <td className={cn("border-b border-[var(--line-soft)] px-3 py-2 align-middle text-dim", className)} {...props}>
       {children}
     </td>
   );
@@ -56,7 +56,7 @@ export function Tr({
 }) {
   return (
     <tr
-      className={cn(onClick && "cursor-pointer hover:bg-accent-50/60", className)}
+      className={cn(onClick && "cursor-pointer hover:bg-[var(--ink-soft)] hover:text-paper transition-colors", className)}
       onClick={onClick}
     >
       {children}
@@ -81,7 +81,7 @@ export function Pagination({
   const hasNext = to < total;
 
   return (
-    <div className="flex items-center justify-between gap-3 border-t border-zinc-200 px-3 py-2 text-xs text-zinc-500">
+    <div className="flex items-center justify-between gap-3 border-t border-[var(--line-soft)] px-3 py-2 font-mono text-xs text-dim">
       <span>
         {from}–{to} of {total}
       </span>
@@ -108,14 +108,15 @@ function PageLink({
 }) {
   if (disabled) {
     return (
-      <span aria-disabled className="rounded border border-zinc-200 px-2 py-1 text-zinc-300">
+      <span aria-disabled className="rounded border border-[var(--line-soft)] px-2 py-1 text-dim opacity-40">
         {children}
       </span>
     );
   }
   return (
-    <a href={href} className="rounded border border-zinc-300 px-2 py-1 text-zinc-700 hover:bg-zinc-50">
+    <a href={href} className="rounded border border-[var(--line-soft)] px-2 py-1 text-dim transition-colors hover:bg-[var(--ink-soft)] hover:text-paper">
       {children}
     </a>
   );
 }
+

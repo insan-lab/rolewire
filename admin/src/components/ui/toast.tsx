@@ -56,24 +56,24 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               if (!open) setMessages((current) => current.filter((item) => item.id !== message.id));
             }}
             className={cn(
-              "flex items-start gap-2.5 rounded-md border bg-white px-3 py-2.5 shadow-overlay data-[state=open]:animate-slide-up",
-              message.tone === "error" ? "border-red-200" : "border-zinc-200",
+              "flex items-start gap-2.5 rounded-md border bg-[var(--ink-soft)] px-3 py-2.5 shadow-overlay data-[state=open]:animate-slide-up",
+              message.tone === "error" ? "border-red-500/30" : "border-[var(--line-soft)]",
             )}
           >
             <span className="mt-0.5">{ICONS[message.tone]}</span>
             <div className="min-w-0 flex-1">
-              <ToastPrimitive.Title className="text-sm font-medium text-zinc-900">
+              <ToastPrimitive.Title className="text-sm font-medium text-paper">
                 {message.title}
               </ToastPrimitive.Title>
               {message.body ? (
-                <ToastPrimitive.Description className="mt-0.5 text-xs text-zinc-600">
+                <ToastPrimitive.Description className="mt-0.5 text-xs text-dim">
                   {message.body}
                 </ToastPrimitive.Description>
               ) : null}
             </div>
             <ToastPrimitive.Close
               aria-label="Dismiss"
-              className="rounded px-1 text-xs text-zinc-400 hover:text-zinc-700"
+              className="rounded px-1 text-xs text-dim hover:text-paper"
             >
               ✕
             </ToastPrimitive.Close>

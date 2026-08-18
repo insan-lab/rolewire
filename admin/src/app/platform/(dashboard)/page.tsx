@@ -41,7 +41,7 @@ export default async function PlatformOverviewPage() {
         <Card>
           <CardHeader title="Subscriptions" description="Active, across every tenant" />
           <CardBody>
-            <p className="text-2xl font-semibold tracking-tight text-zinc-900">
+            <p className="text-2xl font-semibold tracking-tight text-paper">
               {stats.subscriptions_active}
             </p>
           </CardBody>
@@ -51,13 +51,13 @@ export default async function PlatformOverviewPage() {
           <CardHeader title="Revenue" description="Paid invoices, all time" />
           <CardBody>
             {revenueEntries.length === 0 ? (
-              <p className="text-sm text-zinc-500">No paid invoices yet.</p>
+              <p className="text-sm text-dim">No paid invoices yet.</p>
             ) : (
               <dl className="space-y-1.5">
                 {revenueEntries.map(([currency, amount]) => (
                   <div key={currency} className="flex items-baseline justify-between">
-                    <dt className="text-xs text-zinc-500">{currency}</dt>
-                    <dd className="text-sm font-medium text-zinc-900">
+                    <dt className="font-mono text-xs text-dim">{currency}</dt>
+                    <dd className="text-sm font-medium text-paper">
                       {formatMoney(amount, currency)}
                     </dd>
                   </div>

@@ -103,15 +103,15 @@ export function BillingUpgrade({
         />
       ) : null}
 
-      <div className="flex items-center gap-1 rounded-md border border-zinc-200 bg-white p-1 text-sm">
+      <div className="flex items-center gap-1 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] p-1 text-sm">
         {(["monthly", "yearly"] as Cycle[]).map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => setCycle(option)}
             className={cn(
-              "rounded px-3 py-1 font-medium capitalize",
-              cycle === option ? "bg-zinc-900 text-white" : "text-zinc-600 hover:bg-zinc-100",
+              "rounded px-3 py-1 font-medium capitalize transition-colors",
+              cycle === option ? "bg-copper-bright text-ink" : "text-dim hover:text-paper",
             )}
           >
             {option}
@@ -131,13 +131,13 @@ export function BillingUpgrade({
           const isCurrent = plan.id === currentPlanId;
 
           return (
-            <Card key={plan.id} className={cn(isCurrent && "border-accent-400 ring-1 ring-accent-200")}>
+            <Card key={plan.id} className={cn(isCurrent && "ring-1 ring-[var(--copper)]")}>
               <CardHeader
                 title={<span className="capitalize">{plan.name}</span>}
                 description={`${formatMoney(price, isBd ? "BDT" : "USD")} / ${cycle === "monthly" ? "mo" : "yr"}`}
               />
               <CardBody className="space-y-4">
-                <ul className="space-y-1.5 text-sm text-zinc-700">
+                <ul className="space-y-1.5 text-sm text-dim">
                   {Object.entries(plan.features).map(([key, value]) =>
                     value === true || typeof value === "number" ? (
                       <li key={key}>{featureLabel(key, value)}</li>
@@ -160,7 +160,7 @@ export function BillingUpgrade({
         })}
       </div>
 
-      <p className="text-xs text-zinc-500">
+      <p className="font-mono text-xs text-dim">
         {isBd
           ? "Paying with bKash or Nagad via UddoktaPay. Renewals are charged manually each cycle."
           : "Card and PayPal via Paddle, which handles VAT/GST as merchant of record."}

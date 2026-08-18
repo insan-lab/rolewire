@@ -45,17 +45,17 @@ export default async function PlatformCompaniesPage({
                 {page.items.map((company) => (
                   <Tr key={company.id}>
                     <Td>
-                      <p className="font-medium text-zinc-900">{company.name}</p>
-                      <p className="text-xs text-zinc-500">{company.slug}</p>
+                      <p className="font-medium text-paper">{company.name}</p>
+                      <p className="font-mono text-xs text-dim">{company.slug}</p>
                     </Td>
                     <Td>
                       <TenantStatusBadge status={company.status} />
                     </Td>
-                    <Td className="capitalize text-zinc-600">{company.plan_name ?? "—"}</Td>
-                    <Td className="text-zinc-600">{company.region ?? "—"}</Td>
-                    <Td className="text-right text-zinc-600">{company.user_count}</Td>
-                    <Td className="text-right text-zinc-600">{company.job_count}</Td>
-                    <Td className="text-right text-xs text-zinc-500">{formatDate(company.created_at)}</Td>
+                    <Td className="capitalize text-dim">{company.plan_name ?? "—"}</Td>
+                    <Td className="text-dim">{company.region ?? "—"}</Td>
+                    <Td className="text-right text-dim">{company.user_count}</Td>
+                    <Td className="text-right text-dim">{company.job_count}</Td>
+                    <Td className="text-right text-xs text-dim">{formatDate(company.created_at)}</Td>
                   </Tr>
                 ))}
               </tbody>

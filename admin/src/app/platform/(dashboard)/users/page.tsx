@@ -42,15 +42,15 @@ export default async function PlatformUsersPage({
               <tbody>
                 {page.items.map((user) => (
                   <Tr key={user.id}>
-                    <Td className="font-medium text-zinc-900">{user.email}</Td>
-                    <Td className="text-zinc-600">{user.tenant_name}</Td>
-                    <Td className="capitalize text-zinc-600">{user.role}</Td>
+                    <Td className="font-medium text-paper">{user.email}</Td>
+                    <Td className="text-dim">{user.tenant_name}</Td>
+                    <Td className="capitalize text-dim">{user.role}</Td>
                     <Td>
                       <Badge tone={user.email_verified ? "success" : "neutral"}>
                         {user.email_verified ? "Verified" : "Unverified"}
                       </Badge>
                     </Td>
-                    <Td className="text-right text-xs text-zinc-500">{formatDate(user.created_at)}</Td>
+                    <Td className="text-right text-xs text-dim">{formatDate(user.created_at)}</Td>
                   </Tr>
                 ))}
               </tbody>

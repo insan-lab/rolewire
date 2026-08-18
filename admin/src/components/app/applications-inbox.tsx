@@ -90,8 +90,8 @@ export function ApplicationsInbox({
               aria-current={status === tab.value ? "true" : undefined}
               className={
                 status === tab.value
-                  ? "rounded-md bg-zinc-900 px-2.5 py-1 text-sm font-medium text-white"
-                  : "rounded-md px-2.5 py-1 text-sm text-zinc-600 hover:bg-zinc-100"
+                  ? "rounded-md bg-copper-bright px-2.5 py-1 text-sm font-medium text-ink"
+                  : "rounded-md px-2.5 py-1 text-sm text-dim hover:bg-[var(--ink-soft)] hover:text-paper"
               }
             >
               {tab.label}
@@ -106,7 +106,7 @@ export function ApplicationsInbox({
               name="job"
               defaultValue={jobId ?? ""}
               onChange={(event) => event.currentTarget.form?.requestSubmit()}
-              className="h-8 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-700"
+              className="h-8 rounded-md border border-[var(--line-soft)] bg-[var(--ink-soft)] px-2 text-sm text-paper"
             >
               <option value="">All jobs</option>
               {jobsForFilter.map((job) => (
@@ -139,16 +139,16 @@ export function ApplicationsInbox({
             <tbody>
               {items.map((application) => (
                 <Tr key={application.id} onClick={() => setOpenId(application.id)}>
-                  <Td className="font-medium text-zinc-900">{applicantLabel(application)}</Td>
+                  <Td className="font-medium text-paper">{applicantLabel(application)}</Td>
                   {jobsForFilter ? (
-                    <Td className="text-zinc-600">
+                    <Td className="text-dim">
                       {jobsById.get(application.job_id)?.title ?? "Deleted job"}
                     </Td>
                   ) : null}
                   <Td>
                     <ApplicationStatusBadge status={application.status} />
                   </Td>
-                  <Td className="text-right text-xs text-zinc-500">
+                  <Td className="text-right text-xs text-dim">
                     {relativeTime(application.created_at)}
                   </Td>
                 </Tr>
@@ -156,7 +156,7 @@ export function ApplicationsInbox({
             </tbody>
           </Table>
           {status ? (
-            <p className="border-t border-zinc-200 px-3 py-2 text-xs text-zinc-500">
+            <p className="border-t border-[var(--line-soft)] px-3 py-2 font-mono text-xs text-dim">
               Showing {items.length} {status} of {data.items.length} loaded.
             </p>
           ) : (

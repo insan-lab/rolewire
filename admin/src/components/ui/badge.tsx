@@ -4,11 +4,11 @@ import type { ApplicationStatus, JobStatus } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 const TONES = {
-  neutral: "bg-zinc-100 text-zinc-700 ring-zinc-200",
-  accent: "bg-accent-50 text-accent-700 ring-accent-200",
-  success: "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  warning: "bg-amber-50 text-amber-800 ring-amber-200",
-  danger: "bg-red-50 text-red-700 ring-red-200",
+  neutral: "bg-[var(--ink-soft)] text-dim ring-[var(--line-soft)]",
+  accent: "bg-[rgba(192,122,62,0.15)] text-copper-bright ring-[var(--copper)]",
+  success: "bg-[rgba(127,174,122,0.15)] text-[var(--signal)] ring-[var(--signal)]",
+  warning: "bg-[rgba(251,191,36,0.15)] text-amber-400 ring-amber-500/30",
+  danger: "bg-[rgba(248,113,113,0.15)] text-red-400 ring-red-500/30",
 } as const;
 
 export type BadgeTone = keyof typeof TONES;
