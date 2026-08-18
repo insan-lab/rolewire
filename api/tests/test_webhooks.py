@@ -10,7 +10,7 @@ from httpx import AsyncClient
 from sqlalchemy import select
 
 from app.core.db import get_sessionmaker
-from app.models import Invoice, Plan, Subscription, Tenant, User
+from app.models import Invoice, Plan, Subscription, Tenant
 from app.services.signatures import sign_outbound
 from tests.conftest import auth_headers
 
@@ -152,21 +152,3 @@ async def test_uddoktapay_requires_api_key(client: AsyncClient) -> None:
     assert wrong.status_code == 401
 
 
-async def test_brevo_bounce_flags_email_as_undeliverable(client: AsyncClient) -> None:
-    await auth_headers(client, email="bounce@acmecorp.io")
-    response = await client.post(
-        "/v1/webhooks/brevo",
-        json=[{"event": "hard_bounce", "email": "bounce@acmecorp.io"}],
-        headers={"X-Brevo-Webhook-Token": "brevo-test-secret"},
-    )
-    assert response.status_code == 200
-    assert response.json()["updated"] == 1
-
-    async with get_sessionmaker()() as session:
-        user = await session.scalar(select(User).where(User.email == "bounce@acmecorp.io"))
-    assert user is not None and user.email_deliverable is False
-
-
-async def test_brevo_requires_token(client: AsyncClient) -> None:
-    response = await client.post("/v1/webhooks/brevo", json=[{"event": "hard_bounce"}])
-    assert response.status_code == 401

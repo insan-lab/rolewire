@@ -14,7 +14,7 @@ Full design: [`docs/spec.md`](docs/spec.md). This README covers what is built an
 | Postgres schema + RLS migration (`api/alembic/`) | implemented |
 | Storage adapters: hosted S3, tenant S3, Google Drive, Telegram | implemented |
 | Payments: Paddle + UddoktaPay (checkout, webhooks, renewal emulation) | implemented |
-| Brevo transactional email + delivery webhook | implemented |
+| Transactional email via direct SMTP | implemented |
 | Docker Compose, Nginx, least-privilege Postgres role | implemented |
 | Next.js admin panel (`admin/`), containerized | implemented |
 | Hosted OpenCATS provisioning | out of scope for v0.1 (§13); `ats_webhook_url` forwarding ships instead |
@@ -24,7 +24,7 @@ Full design: [`docs/spec.md`](docs/spec.md). This README covers what is built an
 ```bash
 uv pip install -e ".[dev]"     # or: make install
 cp .env.example .env           # fill JWT_SECRET, ENCRYPTION_KEY, IP_HASH_SALT
-make test                      # 95 tests, no external services needed
+make test                      # 100 tests, no external services needed
 ```
 
 Generate the two cryptographic values:
@@ -79,7 +79,7 @@ GET    /v1/admin/storage-configs | POST | DELETE /{id}
 GET    /v1/admin/billing | /billing/plans | POST /billing/upgrade
 ```
 
-Webhooks (signature-authenticated, no JWT): `POST /v1/webhooks/{paddle,uddoktapay,brevo}`.
+Webhooks (signature-authenticated, no JWT): `POST /v1/webhooks/{paddle,uddoktapay}`.
 
 Ops: `GET /health`, `GET /health/ready`.
 
@@ -127,7 +127,7 @@ reason. Point it at a throwaway database — it runs `alembic downgrade base` fi
 - Public endpoints are rate-limited per `(job_id, ip_hash)` for applications and per IP for reads,
   with payload and upload size caps.
 - Webhook routes verify provider signatures (Paddle HMAC with timestamp tolerance, UddoktaPay API
-  key, Brevo shared secret/HMAC) and fail closed when the secret is unset.
+  key) and fail closed when the secret is unset.
 - OAuth uses Authorization Code + PKCE with a mandatory server-side `state`; redirect URIs are
   built from configuration, never from request input. Facebook email matches never auto-link to an
   existing account because Facebook does not verify email ownership.
@@ -169,10 +169,11 @@ api/
     schemas/    Pydantic request/response models
     routers/    public, admin_auth, admin_oauth, admin_jobs, admin_storage, admin_billing, webhooks
     services/   accounts, answers, storage, sigv4, billing, email, dispatch, signatures, oauth, usage, queue
+    templates/email/  Jinja2 HTML + plaintext templates, sent over SMTP by services/email.py
     worker.py   arq tasks + cron
     cli.py      seed-plans, list-plans, generate-encryption-key
   alembic/      migrations (0001 = schema + RLS)
-  tests/        95 tests + 6 Postgres RLS tests that skip unless ROLEWIRE_TEST_PG_URL is set
+  tests/        100 tests + 6 Postgres RLS tests that skip unless ROLEWIRE_TEST_PG_URL is set
 nginx/          reverse proxy config
 postgres/init/  least-privilege app role bootstrap
 ```

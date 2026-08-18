@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * Landing page for the verification link in Brevo-sent mail (frontend spec §3).
+ * Landing page for the verification link in SMTP-sent mail (frontend spec §3).
  *
  * The API as built has no email-verification endpoint yet: `users.email_verified` is set only when
  * a social provider vouches for the address (backend spec §5.3). So this page cannot confirm a

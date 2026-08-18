@@ -438,23 +438,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/webhooks/brevo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Brevo delivery events */
-        post: operations["brevo_webhook_v1_webhooks_brevo_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/health": {
         parameters: {
             query?: never;
@@ -1089,8 +1072,6 @@ export interface components {
             email: string;
             /** Email Verified */
             email_verified: boolean;
-            /** Email Deliverable */
-            email_deliverable: boolean;
             /** Avatar Url */
             avatar_url: string | null;
             /** Role */
@@ -2017,39 +1998,6 @@ export interface operations {
                 content: {
                     "application/json": {
                         [key: string]: string;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    brevo_webhook_v1_webhooks_brevo_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Brevo-Webhook-Token"?: string | null;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: number;
                     };
                 };
             };

@@ -32,7 +32,7 @@ Applications can be routed to Rolewire's hosted storage (pay-as-you-go), the bus
 | Reverse proxy | Nginx or Caddy | TLS termination, routes `/v1/public/*` and `/v1/admin/*` to FastAPI, `/` to Next.js |
 | Containerization | Docker, docker-compose | Single compose file for dev; split compose + profiles for prod |
 | Payments | **Paddle** (Merchant of Record) for global card payments; **UddoktaPay** (bKash/Nagad) for Bangladesh | Region resolved by payment method availability, not IP/country dropdown — see §9 |
-| Email | **Brevo** (transactional: OTP, application-received receipts, plan notices) | Stalwart remains for inbound support mail (`support@rolewire.com` etc.); Brevo handles all outbound transactional/marketing send |
+| Email | **Direct SMTP** (transactional: OTP, application-received receipts, plan notices) | Templates rendered locally (Jinja2) and sent over SMTP from the FastAPI worker; no third-party ESP |
 | Monitoring | Uptime Kuma | Matches existing infra pattern |
 
 ---
@@ -290,10 +290,9 @@ GET    /v1/admin/storage-configs
 GET    /v1/admin/billing
 POST   /v1/admin/billing/upgrade
 
-# Payment/email provider webhooks (signature-verified, not JWT-protected — see §12)
+# Payment provider webhooks (signature-verified, not JWT-protected — see §12)
 POST   /v1/webhooks/paddle
 POST   /v1/webhooks/uddoktapay
-POST   /v1/webhooks/brevo
 ```
 
 All admin routes require a valid JWT; middleware extracts `tenant_id` from the token and sets the Postgres session variable for RLS before any query executes.
@@ -421,7 +420,7 @@ volumes:
   redisdata:
 ```
 
-**Secrets:** follow the existing GuptoAI pattern — `1Password CLI (op run)` injects env vars at container start rather than committing `.env` to the repo. Sourced this way: `POSTGRES_PASSWORD`, JWT signing secret, storage-encryption key, OAuth client ID/secret pairs (Google, Facebook, GitHub, LinkedIn), Paddle API key + webhook secret, UddoktaPay API key + webhook secret, and Brevo API key + webhook verification secret.
+**Secrets:** follow the existing GuptoAI pattern — `1Password CLI (op run)` injects env vars at container start rather than committing `.env` to the repo. Sourced this way: `POSTGRES_PASSWORD`, JWT signing secret, storage-encryption key, OAuth client ID/secret pairs (Google, Facebook, GitHub, LinkedIn), Paddle API key + webhook secret, UddoktaPay API key + webhook secret, and SMTP credentials.
 
 **Prod split:** in production, `postgres` and `redis` likely move to managed/dedicated services (or stay on `zaka-lab`-style droplet per existing infra conventions), and this compose file splits into `docker-compose.yml` (app services) + `docker-compose.override.prod.yml`.
 
@@ -479,7 +478,7 @@ CREATE TABLE invoices (
 
 ### 9.4 UddoktaPay integration
 
-- UddoktaPay is a checkout aggregator, not a subscription-billing platform — it processes one-time charges. **Recurring billing is emulated**: on successful payment, `subscriptions.current_period_end` is set to `now() + 1 month` (or `+1 year`), and a scheduled worker job checks daily for subscriptions nearing expiry to trigger a renewal payment link sent via Brevo email + optionally a reminder pushed to the tenant's connected Telegram, if applicable
+- UddoktaPay is a checkout aggregator, not a subscription-billing platform — it processes one-time charges. **Recurring billing is emulated**: on successful payment, `subscriptions.current_period_end` is set to `now() + 1 month` (or `+1 year`), and a scheduled worker job checks daily for subscriptions nearing expiry to trigger a renewal payment link sent via SMTP email + optionally a reminder pushed to the tenant's connected Telegram, if applicable
 - Webhook endpoint: `POST /v1/webhooks/uddoktapay` — verifies UddoktaPay's callback signature, marks the invoice `paid`, extends `current_period_end`
 - No `provider_subscription_id` exists on this rail (UddoktaPay has no subscription object) — `subscriptions.provider_subscription_id` stays null for `provider = 'uddoktapay'` rows; renewal state lives entirely in Rolewire's own `subscriptions`/`invoices` tables
 - Grace period: on missed renewal, `subscriptions.status` moves to `past_due` for a configurable window (e.g. 5 days) before `tenants.status` flips to `suspended` and public API responses for that tenant's jobs start returning `410 Gone` with a message pointing to the renewal link
@@ -522,12 +521,12 @@ rolewire/
 
 ---
 
-## 11. Email (Brevo)
+## 11. Email (direct SMTP)
 
-- All outbound transactional email (OTP/magic-link if added later, welcome email, application-received receipt to applicant, renewal reminders, payment-failed notices, plan-upgrade confirmations) goes through **Brevo's transactional API**, not raw SMTP via Stalwart — Stalwart stays for inbound support/contact mail only, keeping deliverability reputation separate between "marketing/transactional sender" and "team inbox"
-- Templates managed in Brevo's template editor, referenced by template ID from the FastAPI worker (`services/email.py`), so copy changes don't require a redeploy
-- Brevo webhook endpoint: `POST /v1/webhooks/brevo` — handles bounce/complaint/unsubscribe events, flips a `users.email_deliverable = false` flag (add column) so the admin panel can surface "your notification email is bouncing" rather than silently losing renewal reminders
-- Pro-tier "email sending to applicants" feature (from the pricing tiers discussed earlier) is a **separate Brevo sub-account or dedicated sending domain** from Rolewire's own transactional mail, so a tenant's bulk applicant-communication volume/reputation never affects Rolewire's own OTP/billing email deliverability
+- All outbound transactional email (OTP/magic-link if added later, welcome email, application-received receipt to applicant, renewal reminders, payment-failed notices, plan-upgrade confirmations) is sent **directly over SMTP** (`aiosmtplib`) from the FastAPI worker — no third-party ESP
+- Templates are Jinja2 files in the repo (`app/templates/email/`, HTML + plaintext per key), referenced by template key from `services/email.py`; copy changes ship through a normal deploy
+- No delivery-event webhook: plain SMTP has no bounce/complaint push notification (that would need a bounce mailbox + DSN parsing), so Rolewire does not track per-address deliverability — a send either succeeds at SMTP-accept time or raises
+- Pro-tier "email sending to applicants" feature (from the pricing tiers discussed earlier), if built, would need a **dedicated sending domain/relay** separate from Rolewire's own transactional SMTP account, so a tenant's bulk applicant-communication volume/reputation never affects Rolewire's own OTP/billing email deliverability
 
 ---
 
@@ -539,7 +538,7 @@ rolewire/
 - Public endpoints get aggressive rate limiting and payload size caps (file uploads capped per plan) to prevent abuse of the intentionally-unauthenticated surface
 - IPs are never persisted; `ip_hash` is derived transiently and only lives in the Redis rate-limit key (TTL'd)
 - CORS on public endpoints is intentionally permissive (`*`) since businesses embed these on arbitrary custom domains — admin endpoints are strictly locked to the admin panel's own origin
-- Payment webhook endpoints (`/v1/webhooks/paddle`, `/v1/webhooks/uddoktapay`, `/v1/webhooks/brevo`) verify provider signatures before processing and are excluded from the general admin JWT requirement — signature verification is the auth for these routes
+- Payment webhook endpoints (`/v1/webhooks/paddle`, `/v1/webhooks/uddoktapay`) verify provider signatures before processing and are excluded from the general admin JWT requirement — signature verification is the auth for these routes
 
 ---
 

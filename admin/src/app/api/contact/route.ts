@@ -1,15 +1,14 @@
 /**
- * Contact form → support inbox, sent through Brevo (frontend spec §3.2).
+ * Contact form → support inbox, sent directly over SMTP (frontend spec §3.2).
  *
- * Brevo is called from this route handler rather than the API because the backend exposes no
- * contact endpoint — outbound transactional mail there is applicant receipts only. The API key is
- * server-only and never reaches the browser.
+ * Sent from this route handler rather than the API because the backend exposes no contact
+ * endpoint — outbound transactional mail there is applicant receipts only. SMTP credentials are
+ * server-only and never reach the browser.
  */
+import nodemailer from "nodemailer";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { contactSchema } from "@/lib/validation";
-
-const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
 /**
  * Coarse in-memory throttle: enough to stop a bored bot, not a substitute for a real limiter.
@@ -58,13 +57,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const apiKey = process.env.BREVO_API_KEY;
+  const host = process.env.SMTP_HOST;
   const inbox = process.env.SUPPORT_INBOX_EMAIL;
-  const sender = process.env.BREVO_SENDER_EMAIL ?? inbox;
+  const sender = process.env.SMTP_FROM_EMAIL ?? inbox;
 
-  if (!apiKey || !inbox || !sender) {
+  if (!host || !inbox || !sender) {
     // Fail loudly in the server log, politely in the UI: the page also shows a mailto fallback.
-    console.error("contact form is not configured (BREVO_API_KEY / SUPPORT_INBOX_EMAIL missing)");
+    console.error("contact form is not configured (SMTP_HOST / SUPPORT_INBOX_EMAIL missing)");
     return NextResponse.json(
       { detail: "The contact form is not available right now — please email us directly." },
       { status: 503 },
@@ -73,30 +72,28 @@ export async function POST(request: NextRequest) {
 
   const { name, email, message } = parsed.data;
 
-  try {
-    const response = await fetch(BREVO_ENDPOINT, {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json" },
-      body: JSON.stringify({
-        sender: { email: sender, name: "Rolewire website" },
-        to: [{ email: inbox }],
-        // Replies go to the person who wrote in, not to the sending identity.
-        replyTo: { email, name },
-        subject: `Contact form: ${name}`,
-        htmlContent: `<p><strong>${escapeHtml(name)}</strong> &lt;${escapeHtml(email)}&gt;</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
-        textContent: `${name} <${email}>\n\n${message}`,
-      }),
-    });
+  const transport = nodemailer.createTransport({
+    host,
+    port: Number(process.env.SMTP_PORT ?? 587),
+    secure: false,
+    requireTLS: (process.env.SMTP_USE_TLS ?? "true") !== "false",
+    auth: process.env.SMTP_USERNAME
+      ? { user: process.env.SMTP_USERNAME, pass: process.env.SMTP_PASSWORD }
+      : undefined,
+  });
 
-    if (!response.ok) {
-      console.error("brevo rejected the contact message", response.status, await response.text());
-      return NextResponse.json(
-        { detail: "We could not send that message. Please email us directly." },
-        { status: 502 },
-      );
-    }
+  try {
+    await transport.sendMail({
+      from: `"${process.env.SMTP_FROM_NAME ?? "Rolewire website"}" <${sender}>`,
+      to: inbox,
+      // Replies go to the person who wrote in, not to the sending identity.
+      replyTo: `"${name}" <${email}>`,
+      subject: `Contact form: ${name}`,
+      html: `<p><strong>${escapeHtml(name)}</strong> &lt;${escapeHtml(email)}&gt;</p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
+      text: `${name} <${email}>\n\n${message}`,
+    });
   } catch (error) {
-    console.error("brevo request failed", error);
+    console.error("smtp send failed", error);
     return NextResponse.json(
       { detail: "We could not send that message. Please email us directly." },
       { status: 502 },

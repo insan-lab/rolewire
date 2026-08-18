@@ -53,12 +53,6 @@ export default async function AccountSettingsPage({
                 <Badge tone="warning">Unverified</Badge>
               )}
             </div>
-            {!user.email_deliverable ? (
-              <Callout tone="warning">
-                Notification emails to this address have been bouncing. Update it once email changes
-                are supported, or check your inbox for delivery problems.
-              </Callout>
-            ) : null}
           </CardBody>
         </Card>
 

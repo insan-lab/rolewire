@@ -32,7 +32,6 @@ os.environ.update(
         "PUBLIC_READ_RATE_LIMIT": "10000",
         "PADDLE_WEBHOOK_SECRET": "paddle-test-secret",
         "UDDOKTAPAY_API_KEY": "uddoktapay-test-key",
-        "BREVO_WEBHOOK_SECRET": "brevo-test-secret",
         "EXPOSE_DOCS": "true",
     }
 )

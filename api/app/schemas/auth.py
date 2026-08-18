@@ -42,7 +42,6 @@ class UserOut(ORMModel):
     tenant_id: UUID
     email: EmailStr
     email_verified: bool
-    email_deliverable: bool
     avatar_url: str | None
     role: str
     created_at: datetime

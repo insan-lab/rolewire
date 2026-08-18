@@ -49,7 +49,6 @@ def _user_out(user: User, providers: list[str]) -> UserOut:
         tenant_id=user.tenant_id,
         email=user.email,
         email_verified=user.email_verified,
-        email_deliverable=user.email_deliverable,
         avatar_url=user.avatar_url,
         role=user.role,
         created_at=user.created_at,

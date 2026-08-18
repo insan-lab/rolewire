@@ -9,13 +9,7 @@ from datetime import UTC, datetime
 import pytest
 
 from app.core.crypto import decrypt_json, encrypt_json, hash_ip
-from app.services.signatures import (
-    SignatureError,
-    sign_outbound,
-    verify_brevo,
-    verify_paddle,
-    verify_uddoktapay,
-)
+from app.services.signatures import SignatureError, sign_outbound, verify_paddle, verify_uddoktapay
 from app.services.sigv4 import presign_url
 from app.services.storage import object_key, sanitize_filename
 
@@ -42,14 +36,10 @@ def test_paddle_verification_fails_closed_without_a_secret() -> None:
         verify_paddle(secret="", signature_header=f"ts={timestamp};h1={signature}", body=body)
 
 
-def test_uddoktapay_and_brevo_verification() -> None:
+def test_uddoktapay_verification() -> None:
     verify_uddoktapay(api_key="key", provided_key="key")
     with pytest.raises(SignatureError):
         verify_uddoktapay(api_key="key", provided_key="other")
-
-    verify_brevo(secret="shared", provided_token="shared", body=b"[]")
-    with pytest.raises(SignatureError):
-        verify_brevo(secret="shared", provided_token=None, body=b"[]")
 
 
 def test_presigned_url_is_deterministic_for_a_fixed_timestamp() -> None:

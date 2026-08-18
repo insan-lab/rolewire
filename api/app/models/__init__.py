@@ -125,7 +125,6 @@ class User(Base):
     )
     email: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    email_deliverable: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     password_hash: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(Text)
     role: Mapped[str] = mapped_column(String(16), default="admin", nullable=False)

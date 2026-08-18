@@ -61,8 +61,13 @@ class Settings(BaseSettings):
     expose_docs: bool = True
 
     # --- Providers (optional in dev) --------------------------------------
-    brevo_api_key: str = ""
-    brevo_webhook_secret: str = ""
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+    smtp_from_email: str = ""
+    smtp_from_name: str = "Rolewire"
     paddle_webhook_secret: str = ""
     paddle_api_key: str = ""
     paddle_environment: Literal["sandbox", "production"] = "sandbox"

@@ -142,8 +142,8 @@ async def test_auth_context_is_select_only(pg_sessionmaker) -> None:
         await session.execute(text("SELECT set_config('app.current_tenant_id', :t, true)"), {"t": str(alpha)})
         await session.execute(
             text(
-                "INSERT INTO users (id, tenant_id, email, email_verified, email_deliverable, role,"
-                " created_at) VALUES (:id, :t, 'owner@alpha.example', true, true, 'admin', now())"
+                "INSERT INTO users (id, tenant_id, email, email_verified, role,"
+                " created_at) VALUES (:id, :t, 'owner@alpha.example', true, 'admin', now())"
             ),
             {"id": uuid.uuid4(), "t": alpha},
         )
@@ -154,7 +154,7 @@ async def test_auth_context_is_select_only(pg_sessionmaker) -> None:
         assert (await session.scalar(text("SELECT count(*) FROM users"))) == 1
         # The lookup policy grants SELECT only: an update under auth context matches no rows.
         result = await session.execute(
-            text("UPDATE users SET email_deliverable = false WHERE email = 'owner@alpha.example'")
+            text("UPDATE users SET email_verified = false WHERE email = 'owner@alpha.example'")
         )
         assert result.rowcount == 0
         await session.rollback()

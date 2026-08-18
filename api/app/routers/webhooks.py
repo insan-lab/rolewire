@@ -15,11 +15,11 @@ from fastapi import APIRouter, Header, HTTPException, Request, status
 from sqlalchemy import select
 
 from app.core.config import get_settings
-from app.core.db import set_auth_context, set_tenant_context
-from app.models import Plan, Subscription, Tenant, User
+from app.core.db import set_tenant_context
+from app.models import Plan, Subscription, Tenant
 from app.routers.deps import DbSession
 from app.services import billing
-from app.services.signatures import SignatureError, verify_brevo, verify_paddle, verify_uddoktapay
+from app.services.signatures import SignatureError, verify_paddle, verify_uddoktapay
 
 router = APIRouter(prefix="/v1/webhooks", tags=["webhooks"])
 
@@ -215,43 +215,6 @@ async def uddoktapay_webhook(
         raw_payload=event,
     )
     return {"status": "ok", "paid": str(paid).lower()}
-
-
-@router.post("/brevo", summary="Brevo delivery events")
-async def brevo_webhook(
-    request: Request,
-    session: DbSession,
-    token: str | None = Header(default=None, alias="X-Brevo-Webhook-Token"),
-) -> dict[str, int]:
-    body = await request.body()
-    try:
-        verify_brevo(
-            secret=get_settings().brevo_webhook_secret, provided_token=token, body=body
-        )
-    except SignatureError as exc:
-        raise _bad_signature(exc) from exc
-
-    payload = await request.json()
-    events = payload if isinstance(payload, list) else [payload]
-    undeliverable = {"hard_bounce", "blocked", "spam", "invalid_email", "unsubscribed"}
-    updated = 0
-
-    for entry in events:
-        if not isinstance(entry, dict):
-            continue
-        email = entry.get("email")
-        event_name = str(entry.get("event", "")).lower()
-        if not email or event_name not in undeliverable:
-            continue
-        await set_auth_context(session)
-        user = await session.scalar(select(User).where(User.email == str(email).lower()))
-        if user is None:
-            continue
-        await set_tenant_context(session, user.tenant_id)
-        user.email_deliverable = False
-        updated += 1
-
-    return {"updated": updated}
 
 
 __all__ = ["router"]

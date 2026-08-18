@@ -43,7 +43,7 @@ The admin panel is where a tenant's team logs in, creates job posts with custom 
 /login                     → email+password login, OAuth buttons (Google/Facebook/GitHub/LinkedIn)
 /signup                    → tenant + first admin user creation, OAuth buttons
 /auth/oauth/callback       → transient route: backend redirects here post-OAuth, sets session, redirects to /dashboard
-/auth/verify-email         → email verification landing (from Brevo-sent link)
+/auth/verify-email         → email verification landing (from SMTP-sent link)
 
 /dashboard                 → overview: active jobs, recent applications, plan usage summary
 
@@ -87,7 +87,7 @@ The one page in this app that *is* a marketing surface rather than an operationa
 Both static, low-priority pages relative to `/` and `/pricing`, but real search-entry and trust-signal surfaces worth having from day one rather than bolted on later:
 
 - **`/about`** — short, plain account of what Rolewire is and why it's built headless/API-first, plus enough real information (team, location) to read as a legitimate business rather than a template SaaS — worth keeping honest and specific rather than generic "our mission" copy.
-- **`/contact`** — a simple form (name, email, message) posting to a route handler that sends via Brevo to the support inbox (matches backend spec §11 — Brevo owns outbound transactional mail), plus a direct support email address shown in text for anyone who'd rather not use a form. No live chat widget for v0.1 — adds a third-party script dependency for a volume this stage doesn't need yet.
+- **`/contact`** — a simple form (name, email, message) posting to a route handler that sends over SMTP to the support inbox (matches backend spec §11 — direct SMTP, no third-party ESP), plus a direct support email address shown in text for anyone who'd rather not use a form. No live chat widget for v0.1 — adds a third-party script dependency for a volume this stage doesn't need yet.
 
 ---
 
@@ -218,4 +218,4 @@ Slots into the `admin` service already defined in `docker-compose.yml` in the ba
 1. Should the job-creation wizard auto-save as `draft` after step 1, or hold state client-side until final submit? Auto-save is friendlier for interrupted sessions but adds abandoned-draft cleanup considerations.
 2. Rich text for job descriptions — confirm Tiptap (or similar) vs. plain markdown textarea; markdown is simpler to spec and matches the public API returning a `description` string cleanly, but a WYSIWYG is friendlier for non-technical HR users.
 3. Applications inbox polling interval — needs to balance perceived real-time-ness against unnecessary API load at scale; start conservative (e.g. 30s) and revisit.
-4. Whether `/settings/team` invite flow needs email-based invites (via Brevo) for v0.1 or can wait, given multi-seat RBAC is already flagged out-of-scope for v0.1 in the backend spec.
+4. Whether `/settings/team` invite flow needs email-based invites (via SMTP) for v0.1 or can wait, given multi-seat RBAC is already flagged out-of-scope for v0.1 in the backend spec.

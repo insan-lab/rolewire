@@ -1406,59 +1406,6 @@
         }
       }
     },
-    "/v1/webhooks/brevo": {
-      "post": {
-        "tags": [
-          "webhooks"
-        ],
-        "summary": "Brevo delivery events",
-        "operationId": "brevo_webhook_v1_webhooks_brevo_post",
-        "parameters": [
-          {
-            "name": "X-Brevo-Webhook-Token",
-            "in": "header",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Brevo-Webhook-Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "integer"
-                  },
-                  "title": "Response Brevo Webhook V1 Webhooks Brevo Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/health": {
       "get": {
         "tags": [
@@ -3132,10 +3079,6 @@
             "type": "boolean",
             "title": "Email Verified"
           },
-          "email_deliverable": {
-            "type": "boolean",
-            "title": "Email Deliverable"
-          },
           "avatar_url": {
             "anyOf": [
               {
@@ -3176,7 +3119,6 @@
           "tenant_id",
           "email",
           "email_verified",
-          "email_deliverable",
           "avatar_url",
           "role",
           "created_at"

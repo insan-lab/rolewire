@@ -55,7 +55,7 @@ just needs your one domain.
   - Paddle (global payments) — API key, webhook secret, and at least one product/price created in
     the Paddle dashboard
   - UddoktaPay (Bangladesh payments) — API key, webhook secret, base URL
-  - Brevo (transactional email) — API key, webhook secret
+  - SMTP account (transactional email) — host, port, username/password, from address
   - OAuth apps for whichever of Google/GitHub/Facebook/LinkedIn you want as login options
   - S3-compatible bucket if you're offering Rolewire-hosted storage (DigitalOcean Spaces, AWS S3)
 - `git`, and somewhere to keep secrets out of the repo — the project's convention is 1Password
@@ -141,7 +141,7 @@ ADMIN_ALLOWED_ORIGINS=https://app.rolewire.com
 NEXT_PUBLIC_API_URL=https://app.rolewire.com
 NEXT_PUBLIC_APP_URL=https://app.rolewire.com
 
-# ...then Paddle/UddoktaPay/Brevo/OAuth/hosted-S3 keys from §5, whichever you're enabling
+# ...then Paddle/UddoktaPay/SMTP/OAuth/hosted-S3 keys from §5, whichever you're enabling
 ```
 
 `DATABASE_URL` here is the app's own connection string (`rolewire_app`, the RLS-constrained role);
@@ -165,12 +165,14 @@ even though only one appears in `DATABASE_URL`.
   admin panel's JS bundle at *build* time — see §6, not something you can change by just editing
   `.env` after the image is built).
 - **UddoktaPay**: `UDDOKTAPAY_API_KEY`, `UDDOKTAPAY_WEBHOOK_SECRET`, `UDDOKTAPAY_BASE_URL`.
-- **Brevo**: `BREVO_API_KEY`, `BREVO_WEBHOOK_SECRET`.
+- **SMTP**: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_USE_TLS`,
+  `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME` — plus `SUPPORT_INBOX_EMAIL` for the admin panel's contact
+  form, which sends through the same account.
 - **Hosted S3** (only if offering Rolewire-hosted storage): `HOSTED_S3_ENDPOINT`, `HOSTED_S3_BUCKET`,
   `HOSTED_S3_REGION`, `HOSTED_S3_ACCESS_KEY`, `HOSTED_S3_SECRET_KEY`.
 
-Webhook URLs (Paddle/UddoktaPay/Brevo dashboards) need the domain to already resolve, so those get
-wired up in §9 after the first boot — chicken-and-egg with a domain that isn't live yet otherwise.
+Webhook URLs (Paddle/UddoktaPay dashboards) need the domain to already resolve, so those get wired
+up in §9 after the first boot — chicken-and-egg with a domain that isn't live yet otherwise.
 
 ---
 
@@ -244,10 +246,10 @@ Now that the domain resolves, point each provider's webhook at this host:
 |---|---|
 | Paddle | `https://app.rolewire.com/v1/webhooks/paddle` |
 | UddoktaPay | `https://app.rolewire.com/v1/webhooks/uddoktapay` |
-| Brevo | `https://app.rolewire.com/v1/webhooks/brevo` |
 
-All three verify a provider signature before processing and are excluded from the JWT requirement
-(`docs/spec.md` §12) — nothing else to authenticate on this end.
+Both verify a provider signature before processing and are excluded from the JWT requirement
+(`docs/spec.md` §12) — nothing else to authenticate on this end. Email has no webhook to wire up:
+it's sent directly over SMTP, not through a provider that pushes delivery events back.
 
 ---
 

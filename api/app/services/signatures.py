@@ -57,19 +57,6 @@ def verify_uddoktapay(*, api_key: str, provided_key: str | None) -> None:
         raise SignatureError("uddoktapay api key mismatch")
 
 
-def verify_brevo(*, secret: str, provided_token: str | None, body: bytes) -> None:
-    """Brevo has no signature scheme; a shared secret is sent as a header or HMAC of the body."""
-    if not secret:
-        raise SignatureError("brevo webhook secret is not configured")
-    if not provided_token:
-        raise SignatureError("missing brevo webhook token")
-    if hmac.compare_digest(secret, provided_token):
-        return
-    if hmac.compare_digest(_hmac_sha256(secret, body), provided_token):
-        return
-    raise SignatureError("brevo webhook token mismatch")
-
-
 def sign_outbound(secret: str, body: bytes, timestamp: int | None = None) -> tuple[int, str]:
     """Sign an application forwarded to a tenant's ATS webhook, Paddle-style."""
     ts = timestamp or int(time.time())

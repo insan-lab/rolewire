@@ -53,10 +53,14 @@ services:
         NEXT_PUBLIC_PADDLE_CLIENT_TOKEN: ${NEXT_PUBLIC_PADDLE_CLIENT_TOKEN:-}
         NEXT_PUBLIC_PADDLE_ENVIRONMENT: ${NEXT_PUBLIC_PADDLE_ENVIRONMENT:-sandbox}
         NEXT_PUBLIC_SUPPORT_EMAIL: ${NEXT_PUBLIC_SUPPORT_EMAIL:-support@rolewire.io}
+        NEXT_TELEMETRY_DISABLED: 1
     environment:
       # Server-to-server: stays on the internal Docker network (frontend spec §9), never the
       # browser-facing NEXT_PUBLIC_API_URL baked into the client bundle above.
       API_URL: http://api:8000
+    env_file:
+      # SMTP_* / SUPPORT_INBOX_EMAIL for the contact form route (frontend spec §3.2).
+      - .env
     depends_on:
       api:
         condition: service_started

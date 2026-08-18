@@ -68,9 +68,8 @@ async def send_application_receipt(
     ctx: dict[str, Any], application_id: str, tenant_id: str
 ) -> str:
     """Email the applicant a receipt, if the tenant's plan includes applicant email."""
-    template_id = ctx.get("template_application_received")
-    if not template_id:
-        return "no-template"
+    if not get_settings().smtp_host:
+        return "no-smtp"
     async with tenant_session(UUID(tenant_id)) as session:
         application = await session.scalar(
             select(Application).where(Application.id == UUID(application_id))
@@ -80,13 +79,12 @@ async def send_application_receipt(
         job = await session.scalar(select(Job).where(Job.id == application.job_id))
         tenant = await session.scalar(select(Tenant).where(Tenant.id == UUID(tenant_id)))
         await email.send_template(
-            template_id=int(template_id),
+            key="application_received_applicant",
             to_email=application.applicant_email,
             params={
                 "job_title": job.title if job else "",
                 "company": tenant.name if tenant else "",
             },
-            tags=["application-receipt"],
         )
     return "sent"
 
@@ -102,7 +100,6 @@ async def flush_usage(ctx: dict[str, Any]) -> int:
 async def sweep_renewals(ctx: dict[str, Any]) -> dict[str, int]:
     """Daily: emulate recurring billing for the UddoktaPay rail and apply grace-period rules."""
     settings = get_settings()
-    reminder_template = ctx.get("template_renewal_reminder")
     now = datetime.now(UTC)
     reminders = 0
 
@@ -121,11 +118,11 @@ async def sweep_renewals(ctx: dict[str, Any]) -> dict[str, int]:
                 .where(User.tenant_id == subscription.tenant_id, User.role == "admin")
                 .limit(1)
             )
-            if user is None or not user.email_deliverable or not reminder_template:
+            if user is None or not settings.smtp_host:
                 continue
             try:
                 await email.send_template(
-                    template_id=int(reminder_template),
+                    key="renewal_reminder",
                     to_email=user.email,
                     params={
                         "renew_url": f"{settings.app_base_url.rstrip('/')}/billing",
@@ -133,7 +130,6 @@ async def sweep_renewals(ctx: dict[str, Any]) -> dict[str, int]:
                         if subscription.current_period_end
                         else "",
                     },
-                    tags=["renewal-reminder"],
                 )
                 reminders += 1
             except email.EmailError as exc:
