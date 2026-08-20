@@ -1,7 +1,10 @@
 import { CheckCircle2 } from "lucide-react";
 import type { Metadata } from "next";
 
+import { ChangeEmailForm } from "@/components/app/change-email-form";
+import { ChangePasswordForm } from "@/components/app/change-password-form";
 import { UnlinkProviderButton } from "@/components/app/unlink-provider-button";
+import { UpdateCompanyForm } from "@/components/app/update-company-form";
 import { Badge } from "@/components/ui/badge";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, CardBody, CardHeader, Callout, PageHeader } from "@/components/ui/surface";
@@ -43,7 +46,7 @@ export default async function AccountSettingsPage({
 
         <Card>
           <CardHeader title="Email" />
-          <CardBody className="space-y-2">
+          <CardBody className="space-y-4">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-paper">{user.email}</p>
               {user.email_verified ? (
@@ -54,23 +57,14 @@ export default async function AccountSettingsPage({
                 <Badge tone="warning">Unverified</Badge>
               )}
             </div>
+            <ChangeEmailForm emailVerified={user.email_verified} />
           </CardBody>
         </Card>
 
         <Card>
           <CardHeader title="Password" />
           <CardBody>
-            {user.has_password ? (
-              <Callout tone="neutral">
-                Your account has a password set. Changing it from this panel isn&rsquo;t available
-                yet — contact support if you need it reset.
-              </Callout>
-            ) : (
-              <Callout tone="neutral">
-                You signed up with a social provider and have no password set. Link an email/password
-                login by contacting support, or keep using the providers below.
-              </Callout>
-            )}
+            <ChangePasswordForm hasPassword={user.has_password} />
           </CardBody>
         </Card>
 
@@ -82,11 +76,17 @@ export default async function AccountSettingsPage({
           <CardBody className="grid gap-4 sm:grid-cols-2">
             {user.company_name ? (
               <div className="sm:col-span-2">
-                <p className="mb-1 text-xs text-dim">Company Name</p>
-                <p className="text-base font-semibold text-paper">{user.company_name}</p>
-                {user.company_slug ? (
-                  <p className="font-mono text-xs text-dim">Slug: {user.company_slug}</p>
-                ) : null}
+                {user.role === "admin" ? (
+                  <UpdateCompanyForm companyName={user.company_name} companySlug={user.company_slug ?? null} />
+                ) : (
+                  <>
+                    <p className="mb-1 text-xs text-dim">Company Name</p>
+                    <p className="text-base font-semibold text-paper">{user.company_name}</p>
+                    {user.company_slug ? (
+                      <p className="font-mono text-xs text-dim">Slug: {user.company_slug}</p>
+                    ) : null}
+                  </>
+                )}
               </div>
             ) : null}
             <div>

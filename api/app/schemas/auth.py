@@ -24,6 +24,21 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(default="", max_length=256)
+    new_password: str = Field(min_length=8, max_length=256)
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr
+    current_password: str = Field(max_length=256)
+
+
+class UpdateCompanyRequest(BaseModel):
+    company_name: str = Field(min_length=1, max_length=200)
+    company_slug: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{1,62}$")
+
+
 class TokenPair(BaseModel):
     access_token: str
     refresh_token: str

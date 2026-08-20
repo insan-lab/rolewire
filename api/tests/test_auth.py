@@ -2,9 +2,20 @@
 
 from __future__ import annotations
 
+from sqlalchemy import select
+
 from httpx import AsyncClient
 
+from app.core.db import get_sessionmaker
+from app.models import User
 from tests.conftest import auth_headers
+
+
+async def _mark_email_verified(email: str) -> None:
+    async with get_sessionmaker()() as session:
+        user = await session.scalar(select(User).where(User.email == email))
+        user.email_verified = True
+        await session.commit()
 
 
 async def test_signup_creates_tenant_and_returns_tokens(client: AsyncClient) -> None:
@@ -106,3 +117,96 @@ async def test_unlinking_the_only_login_method_is_blocked(client: AsyncClient) -
 async def test_unknown_oauth_provider_is_404(client: AsyncClient) -> None:
     response = await client.get("/v1/admin/auth/oauth/myspace/start")
     assert response.status_code == 404
+
+
+async def test_change_password_requires_current_password(client: AsyncClient) -> None:
+    headers = await auth_headers(client, email="pw@acmecorp.io")
+    bad = await client.patch(
+        "/v1/admin/auth/password",
+        json={"current_password": "not-my-password", "new_password": "new-horse-battery"},
+        headers=headers,
+    )
+    assert bad.status_code == 401
+
+    ok = await client.patch(
+        "/v1/admin/auth/password",
+        json={"current_password": "correct-horse-battery", "new_password": "new-horse-battery"},
+        headers=headers,
+    )
+    assert ok.status_code == 204
+
+    login = await client.post(
+        "/v1/admin/auth/login",
+        json={"email": "pw@acmecorp.io", "password": "new-horse-battery"},
+    )
+    assert login.status_code == 200
+
+
+async def test_change_email_requires_current_email_verified(client: AsyncClient) -> None:
+    headers = await auth_headers(client, email="unverified@acmecorp.io")
+    response = await client.patch(
+        "/v1/admin/auth/email",
+        json={"new_email": "new@acmecorp.io", "current_password": "correct-horse-battery"},
+        headers=headers,
+    )
+    assert response.status_code == 409
+
+    await _mark_email_verified("unverified@acmecorp.io")
+    response = await client.patch(
+        "/v1/admin/auth/email",
+        json={"new_email": "new@acmecorp.io", "current_password": "correct-horse-battery"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["email"] == "new@acmecorp.io"
+    assert body["email_verified"] is False
+
+
+async def test_admin_can_update_company_name(client: AsyncClient) -> None:
+    headers = await auth_headers(client, email="owner@acmecorp.io", company="Old Name")
+    response = await client.patch(
+        "/v1/admin/auth/company", json={"company_name": "New Name"}, headers=headers
+    )
+    assert response.status_code == 200
+    assert response.json()["company_name"] == "New Name"
+
+    me = await client.get("/v1/admin/auth/me", headers=headers)
+    assert me.json()["company_name"] == "New Name"
+
+
+async def test_admin_can_update_company_slug(client: AsyncClient) -> None:
+    headers = await auth_headers(client, email="slugger@acmecorp.io", company="Sluggers")
+    response = await client.patch(
+        "/v1/admin/auth/company",
+        json={"company_name": "Sluggers", "company_slug": "sluggers-united"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json()["company_slug"] == "sluggers-united"
+
+
+async def test_company_slug_conflict_is_rejected(client: AsyncClient) -> None:
+    await auth_headers(client, email="first@acmecorp.io", company="First Co")
+    first_slug = "first-co"
+    headers = await auth_headers(client, email="second@acmecorp.io", company="Second Co")
+
+    response = await client.patch(
+        "/v1/admin/auth/company",
+        json={"company_name": "Second Co", "company_slug": first_slug},
+        headers=headers,
+    )
+    assert response.status_code == 409
+
+
+async def test_change_email_rejects_duplicate(client: AsyncClient) -> None:
+    await auth_headers(client, email="taken@acmecorp.io")
+    headers = await auth_headers(client, email="mover@acmecorp.io")
+    await _mark_email_verified("mover@acmecorp.io")
+
+    response = await client.patch(
+        "/v1/admin/auth/email",
+        json={"new_email": "taken@acmecorp.io", "current_password": "correct-horse-battery"},
+        headers=headers,
+    )
+    assert response.status_code == 409

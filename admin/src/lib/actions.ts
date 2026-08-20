@@ -17,6 +17,7 @@ import type {
   JobQuestionInput,
   StorageConfig,
   UpgradeCheckout,
+  User,
 } from "@/lib/api/types";
 
 export type ActionResult<T> = { ok: true; data: T } | { ok: false; error: string };
@@ -114,6 +115,36 @@ export async function startUpgradeAction(payload: {
 export async function unlinkProviderAction(provider: string): Promise<ActionResult<null>> {
   return run(
     () => api<null>(`/v1/admin/auth/oauth/${provider}`, { method: "DELETE", allowRefresh: true }),
+    [CACHE_TAGS.account],
+  );
+}
+
+export async function changePasswordAction(payload: {
+  current_password: string;
+  new_password: string;
+}): Promise<ActionResult<null>> {
+  return run(
+    () => api<null>("/v1/admin/auth/password", { method: "PATCH", body: payload, allowRefresh: true }),
+    [CACHE_TAGS.account],
+  );
+}
+
+export async function changeEmailAction(payload: {
+  new_email: string;
+  current_password: string;
+}): Promise<ActionResult<User>> {
+  return run(
+    () => api<User>("/v1/admin/auth/email", { method: "PATCH", body: payload, allowRefresh: true }),
+    [CACHE_TAGS.account],
+  );
+}
+
+export async function updateCompanyAction(payload: {
+  company_name: string;
+  company_slug?: string;
+}): Promise<ActionResult<User>> {
+  return run(
+    () => api<User>("/v1/admin/auth/company", { method: "PATCH", body: payload, allowRefresh: true }),
     [CACHE_TAGS.account],
   );
 }

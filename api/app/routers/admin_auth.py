@@ -20,12 +20,15 @@ from app.core.security import (
     verify_password,
 )
 from app.models import Tenant, User
-from app.routers.deps import CurrentPrincipal, DbSession
+from app.routers.deps import AdminPrincipal, CurrentPrincipal, DbSession
 from app.schemas.auth import (
+    ChangeEmailRequest,
+    ChangePasswordRequest,
     LoginRequest,
     RefreshRequest,
     SignupRequest,
     TokenPair,
+    UpdateCompanyRequest,
     UserOut,
 )
 from app.services import accounts
@@ -122,6 +125,63 @@ async def refresh(payload: RefreshRequest, session: DbSession) -> TokenPair:
 
 @router.get("/me", response_model=UserOut)
 async def me(principal: CurrentPrincipal, session: DbSession) -> UserOut:
+    providers = await accounts.linked_providers(session, principal.user.id)
+    return _user_out(principal.user, providers)
+
+
+@router.patch("/password", status_code=status.HTTP_204_NO_CONTENT)
+async def change_password(
+    payload: ChangePasswordRequest, principal: CurrentPrincipal, session: DbSession
+) -> None:
+    try:
+        await accounts.change_password(
+            session,
+            user=principal.user,
+            current_password=payload.current_password,
+            new_password=payload.new_password,
+        )
+    except accounts.IncorrectPassword as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
+
+
+@router.patch("/email", response_model=UserOut)
+async def change_email(
+    payload: ChangeEmailRequest, principal: CurrentPrincipal, session: DbSession
+) -> UserOut:
+    try:
+        await accounts.change_email(
+            session,
+            user=principal.user,
+            new_email=payload.new_email,
+            current_password=payload.current_password,
+        )
+    except accounts.EmailNotVerified as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except accounts.IncorrectPassword as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(exc)) from exc
+    except accounts.EmailAlreadyRegistered as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="email already registered"
+        ) from exc
+    providers = await accounts.linked_providers(session, principal.user.id)
+    return _user_out(principal.user, providers)
+
+
+@router.patch("/company", response_model=UserOut)
+async def update_company(
+    payload: UpdateCompanyRequest, principal: AdminPrincipal, session: DbSession
+) -> UserOut:
+    try:
+        await accounts.update_tenant(
+            session,
+            tenant=principal.tenant,
+            name=payload.company_name,
+            slug=payload.company_slug,
+        )
+    except accounts.SlugAlreadyTaken as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail="that slug is already taken"
+        ) from exc
     providers = await accounts.linked_providers(session, principal.user.id)
     return _user_out(principal.user, providers)
 

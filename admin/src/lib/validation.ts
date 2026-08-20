@@ -36,6 +36,26 @@ export const signupSchema = z.object({
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 
+export const changePasswordSchema = z.object({
+  current_password: z.string().max(256).optional().or(z.literal("")),
+  new_password: passwordSchema,
+});
+
+export const changeEmailSchema = z.object({
+  new_email: emailSchema,
+  current_password: z.string().min(1, "Enter your password").max(256),
+});
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ChangeEmailInput = z.infer<typeof changeEmailSchema>;
+
+export const updateCompanySchema = z.object({
+  company_name: z.string().trim().min(1, "Enter your company name").max(200),
+  company_slug: slugSchema,
+});
+
+export type UpdateCompanyInput = z.infer<typeof updateCompanySchema>;
+
 // --- Jobs -------------------------------------------------------------------
 
 export const FIELD_KEY_PATTERN = /^[a-z][a-z0-9_]{0,62}$/;

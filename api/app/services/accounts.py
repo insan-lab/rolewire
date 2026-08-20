@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import set_auth_context, set_tenant_context
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.models import OAuthAccount, Plan, Tenant, User
 
 _SLUG_RE = re.compile(r"[^a-z0-9]+")
@@ -30,6 +30,18 @@ class EmailAlreadyRegistered(AccountError):
 
 class InvalidLoginMethod(AccountError):
     """Raised when an operation would leave a user with no way to log in."""
+
+
+class IncorrectPassword(AccountError):
+    pass
+
+
+class EmailNotVerified(AccountError):
+    """Raised when changing email while the current address is still unverified."""
+
+
+class SlugAlreadyTaken(AccountError):
+    pass
 
 
 def slugify(value: str) -> str:
@@ -160,6 +172,51 @@ async def linked_providers(session: AsyncSession, user_id: uuid.UUID) -> list[st
         select(OAuthAccount.provider).where(OAuthAccount.user_id == user_id)
     )
     return list(rows)
+
+
+async def change_password(
+    session: AsyncSession, *, user: User, current_password: str, new_password: str
+) -> None:
+    """Set a new password. If one is already set, the current one must verify first."""
+    if user.password_hash and not verify_password(current_password, user.password_hash):
+        raise IncorrectPassword("current password is incorrect")
+    await set_tenant_context(session, user.tenant_id)
+    user.password_hash = hash_password(new_password)
+    await session.flush()
+
+
+async def change_email(
+    session: AsyncSession, *, user: User, new_email: str, current_password: str
+) -> None:
+    """Change email. Requires the current address to already be verified (per policy)."""
+    if not user.email_verified:
+        raise EmailNotVerified("verify your current email before changing it")
+    if not verify_password(current_password, user.password_hash):
+        raise IncorrectPassword("current password is incorrect")
+    new_email = new_email.lower()
+    if new_email == user.email:
+        return
+    existing = await get_user_by_email(session, new_email)
+    if existing is not None:
+        raise EmailAlreadyRegistered(new_email)
+    await set_tenant_context(session, user.tenant_id)
+    user.email = new_email
+    # ponytail: no re-verification email flow exists yet, so the new address starts unverified.
+    user.email_verified = False
+    await session.flush()
+
+
+async def update_tenant(
+    session: AsyncSession, *, tenant: Tenant, name: str, slug: str | None = None
+) -> None:
+    await set_tenant_context(session, tenant.id)
+    tenant.name = name.strip()
+    if slug is not None and slug != tenant.slug:
+        taken = await session.scalar(select(Tenant.id).where(Tenant.slug == slug))
+        if taken is not None:
+            raise SlugAlreadyTaken(slug)
+        tenant.slug = slug
+    await session.flush()
 
 
 async def unlink_provider(session: AsyncSession, user: User, provider: str) -> None:
