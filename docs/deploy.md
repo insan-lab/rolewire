@@ -163,7 +163,7 @@ even though only one appears in `DATABASE_URL`.
   `PADDLE_ENVIRONMENT` (`sandbox` until you're ready for real cards), and the frontend's
   `NEXT_PUBLIC_PADDLE_CLIENT_TOKEN` / `NEXT_PUBLIC_PADDLE_ENVIRONMENT` (this pair is baked into the
   admin panel's JS bundle at *build* time — see §6, not something you can change by just editing
-  `.env` after the image is built).
+  `.env` after the image is built). Full walkthrough: [`paddle.md`](paddle.md).
 - **UddoktaPay**: `UDDOKTAPAY_API_KEY`, `UDDOKTAPAY_WEBHOOK_SECRET`, `UDDOKTAPAY_BASE_URL`.
 - **SMTP**: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_USE_TLS`,
   `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME` — plus `SUPPORT_INBOX_EMAIL` for the admin panel's contact
