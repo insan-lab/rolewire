@@ -6,7 +6,7 @@ from uuid import UUID
 
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.schemas.common import ORMModel
 
@@ -28,6 +28,20 @@ class PlatformJobStatusUpdate(BaseModel):
 class PlatformUserUpdate(BaseModel):
     role: UserRoleType | None = None
     email_verified: bool | None = None
+
+
+class PlatformPlanUpdate(BaseModel):
+    """Both fields are always applied — the panel form submits current values for both, so an
+    omitted/blank field means "clear this price id", not "leave unchanged"."""
+
+    paddle_monthly_price_id: str | None = Field(default=None, max_length=64)
+    paddle_yearly_price_id: str | None = Field(default=None, max_length=64)
+
+    @field_validator("paddle_monthly_price_id", "paddle_yearly_price_id")
+    @classmethod
+    def _blank_to_none(cls, value: str | None) -> str | None:
+        value = (value or "").strip()
+        return value or None
 
 
 class PlatformLoginRequest(BaseModel):
@@ -95,6 +109,17 @@ class PlatformJobOut(BaseModel):
     tenant_id: UUID
     tenant_name: str
     application_count: int
+
+
+class PlatformPlanOut(ORMModel):
+    id: UUID
+    name: str
+    monthly_price_usd: Decimal | None
+    yearly_price_usd: Decimal | None
+    monthly_price_bdt: Decimal | None
+    yearly_price_bdt: Decimal | None
+    paddle_monthly_price_id: str | None
+    paddle_yearly_price_id: str | None
 
 
 class PlatformInvoiceOut(BaseModel):

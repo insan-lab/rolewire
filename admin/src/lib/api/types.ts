@@ -146,6 +146,17 @@ export type PlatformInvoice = {
   tenant_name: string;
 };
 
+export type PlatformPlan = {
+  id: string;
+  name: string;
+  monthly_price_usd: string | null;
+  yearly_price_usd: string | null;
+  monthly_price_bdt: string | null;
+  yearly_price_bdt: string | null;
+  paddle_monthly_price_id: string | null;
+  paddle_yearly_price_id: string | null;
+};
+
 export type ContactSubmissionStatus = "pending" | "in_progress" | "resolved" | "ignored";
 
 export type PlatformContactSubmission = {

@@ -95,6 +95,33 @@ async def test_update_job_status(client: AsyncClient) -> None:
     assert patch_res2.json()["status"] == "closed"
 
 
+async def test_update_plan_paddle_ids(client: AsyncClient, seed_plan) -> None:
+    headers = await _platform_headers(client)
+
+    plans_res = await client.get("/v1/admin/platform/plans", headers=headers)
+    assert plans_res.status_code == 200
+    plan = plans_res.json()[0]
+    assert plan["paddle_monthly_price_id"] == "pri_monthly_basic"
+
+    patch_res = await client.patch(
+        f"/v1/admin/platform/plans/{plan['id']}",
+        headers=headers,
+        json={"paddle_monthly_price_id": "pri_new_m", "paddle_yearly_price_id": "pri_new_y"},
+    )
+    assert patch_res.status_code == 200, patch_res.text
+    assert patch_res.json()["paddle_monthly_price_id"] == "pri_new_m"
+    assert patch_res.json()["paddle_yearly_price_id"] == "pri_new_y"
+
+    # Blank clears the id.
+    clear_res = await client.patch(
+        f"/v1/admin/platform/plans/{plan['id']}",
+        headers=headers,
+        json={"paddle_monthly_price_id": "  ", "paddle_yearly_price_id": "pri_new_y"},
+    )
+    assert clear_res.status_code == 200
+    assert clear_res.json()["paddle_monthly_price_id"] is None
+
+
 async def test_update_user_role_and_verification(client: AsyncClient) -> None:
     tenant_headers = await auth_headers(client, email="member@initech.io", company="Initech")
     headers = await _platform_headers(client)

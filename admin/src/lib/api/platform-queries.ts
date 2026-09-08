@@ -9,6 +9,7 @@ import type {
   PlatformContactSubmission,
   PlatformInvoice,
   PlatformJob,
+  PlatformPlan,
   PlatformStats,
   PlatformUser,
 } from "./types";
@@ -48,6 +49,10 @@ export function listPlatformBilling(options: { limit?: number; offset?: number }
   return platformApiRead<Page<PlatformInvoice>>(
     `/v1/admin/platform/billing${query({ limit: options.limit ?? 50, offset: options.offset })}`,
   );
+}
+
+export function listPlatformPlans() {
+  return platformApiRead<PlatformPlan[]>("/v1/admin/platform/plans");
 }
 
 export function listPlatformContactSubmissions(
