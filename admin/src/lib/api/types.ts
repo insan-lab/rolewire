@@ -153,8 +153,11 @@ export type PlatformPlan = {
   yearly_price_usd: string | null;
   monthly_price_bdt: string | null;
   yearly_price_bdt: string | null;
+  paddle_product_id: string | null;
   paddle_monthly_price_id: string | null;
   paddle_yearly_price_id: string | null;
+  paddle_monthly_price_id_previous: string | null;
+  paddle_yearly_price_id_previous: string | null;
 };
 
 export type ContactSubmissionStatus = "pending" | "in_progress" | "resolved" | "ignored";
