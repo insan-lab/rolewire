@@ -45,6 +45,7 @@ from app.schemas.platform import (
     PlatformJobStatusUpdate,
     PlatformLoginRequest,
     PlatformPlanOut,
+    PlatformPlanReprice,
     PlatformPlanUpdate,
     PlatformRefreshRequest,
     PlatformStats,
@@ -52,6 +53,7 @@ from app.schemas.platform import (
     PlatformUserOut,
     PlatformUserUpdate,
 )
+from app.services.paddle_catalog import PaddleSyncError, reprice_plan, sync_plan_to_paddle
 
 router = APIRouter(prefix="/v1/admin/platform", tags=["platform"])
 
@@ -426,6 +428,50 @@ async def update_plan_paddle_ids(
     plan.paddle_monthly_price_id = payload.paddle_monthly_price_id
     plan.paddle_yearly_price_id = payload.paddle_yearly_price_id
     await session.flush()
+    return PlatformPlanOut.model_validate(plan, from_attributes=True)
+
+
+def _sync_error_status(exc: PaddleSyncError) -> int:
+    # A Paddle HTTP status means Paddle rejected the request → 502 (upstream). No status means a
+    # local precondition failed (missing key / price not set) → 400.
+    return status.HTTP_502_BAD_GATEWAY if exc.status_code else status.HTTP_400_BAD_REQUEST
+
+
+@router.post("/plans/{plan_id}/sync-paddle", response_model=PlatformPlanOut)
+async def sync_plan_paddle(
+    admin: CurrentPlatformAdmin, session: DbSession, plan_id: uuid.UUID
+) -> PlatformPlanOut:
+    plan = await session.scalar(select(Plan).where(Plan.id == plan_id))
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="plan not found")
+
+    try:
+        await sync_plan_to_paddle(session, plan)
+    except PaddleSyncError as exc:
+        raise HTTPException(status_code=_sync_error_status(exc), detail=str(exc)) from exc
+    return PlatformPlanOut.model_validate(plan, from_attributes=True)
+
+
+@router.post("/plans/{plan_id}/reprice", response_model=PlatformPlanOut)
+async def reprice_plan_paddle(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    plan_id: uuid.UUID,
+    payload: PlatformPlanReprice,
+) -> PlatformPlanOut:
+    plan = await session.scalar(select(Plan).where(Plan.id == plan_id))
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="plan not found")
+
+    try:
+        await reprice_plan(
+            session,
+            plan,
+            new_monthly_price_usd=payload.new_monthly_price_usd,
+            new_yearly_price_usd=payload.new_yearly_price_usd,
+        )
+    except PaddleSyncError as exc:
+        raise HTTPException(status_code=_sync_error_status(exc), detail=str(exc)) from exc
     return PlatformPlanOut.model_validate(plan, from_attributes=True)
 
 

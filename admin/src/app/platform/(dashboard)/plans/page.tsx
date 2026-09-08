@@ -1,7 +1,7 @@
 import { Tag } from "lucide-react";
 import type { Metadata } from "next";
 
-import { PlanPaddleForm } from "@/components/platform/plan-paddle-form";
+import { PlanPaddlePanel } from "@/components/platform/plan-paddle-panel";
 import { CopyableId } from "@/components/ui/copyable-id";
 import { Card, CardBody, CardHeader, EmptyState, PageHeader } from "@/components/ui/surface";
 import { listPlatformPlans } from "@/lib/api/platform-queries";
@@ -16,7 +16,7 @@ export default async function PlatformPlansPage() {
     <>
       <PageHeader
         title="Plans"
-        description="Set the Paddle price IDs used when a tenant upgrades. Until both are set for a plan, checkout returns 503 for that plan."
+        description="Sync each plan to Paddle to create its product and prices. Until a plan is synced, checkout returns 503 for that plan."
       />
 
       {plans.length === 0 ? (
@@ -42,11 +42,7 @@ export default async function PlatformPlansPage() {
                 actions={<CopyableId id={plan.id} label="Plan ID" />}
               />
               <CardBody>
-                <PlanPaddleForm
-                  planId={plan.id}
-                  monthlyPriceId={plan.paddle_monthly_price_id}
-                  yearlyPriceId={plan.paddle_yearly_price_id}
-                />
+                <PlanPaddlePanel plan={plan} />
               </CardBody>
             </Card>
           ))}

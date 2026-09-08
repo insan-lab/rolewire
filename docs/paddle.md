@@ -13,10 +13,11 @@ dashboard setup, env vars, wiring price IDs into `plans`, and the webhook.
   (`admin/src/components/app/billing-upgrade.tsx`). Rolewire never collects card data.
 - The API's role on checkout is just to hand back the price id + `tenant_id` for Paddle.js to open
   with (`POST /v1/admin/billing/upgrade` → `app/services/billing.py:start_checkout`). No server-side
-  call to the Paddle API happens here — `PADDLE_API_KEY` is read into config but not currently used
-  by any request path; the webhook signature is what actually authenticates Paddle back to Rolewire.
-  <!-- ponytail: PADDLE_API_KEY is unused today; wire it up if/when Rolewire needs to call Paddle's
-       REST API directly (e.g. server-initiated cancellations) instead of relying on the dashboard. -->
+  call to the Paddle API happens here — the webhook signature is what authenticates Paddle back to
+  Rolewire.
+- `PADDLE_API_KEY` is used by exactly one path: `app/services/paddle_catalog.py`, called from the
+  superadmin **Plans** page to create a plan's Paddle product + prices ("Sync to Paddle") and to
+  create replacement prices on a price change ("Change price" → `/reprice`). See §5.
 - **`POST /v1/webhooks/paddle`** (`app/routers/webhooks.py`) is the source of truth after that: it
   verifies the `Paddle-Signature` header, then handles `subscription.*` events (upserts the
   `subscriptions` row and flips `tenants.plan_id`/`status`) and `transaction.completed` /
@@ -28,17 +29,14 @@ dashboard setup, env vars, wiring price IDs into `plans`, and the webhook.
 
 ---
 
-## 2. Paddle dashboard: account, product, prices
+## 2. Paddle dashboard: account
 
 1. Sign up at [paddle.com](https://paddle.com) (or log into an existing account) and leave it in
    **Sandbox** mode for everything below until you're ready to take real cards — the sandbox/live
    toggle is in the top-left of the dashboard.
-2. **Catalog → Products**: create one product per Rolewire plan (e.g. "Basic", "Pro" — match
-   `DEFAULT_PLANS` in `api/app/cli.py` if you're keeping the default tiers).
-3. On each product, add two **prices**: monthly (billing interval = 1 month) and yearly (billing
-   interval = 1 year), in USD, matching `plans.monthly_price_usd` / `yearly_price_usd`. Paddle is the
-   merchant of record and handles VAT/GST itself — you don't need per-country tax prices here.
-4. Copy each price's id (`pri_...`) — you'll need both (monthly + yearly) per plan for §5.
+
+You do **not** need to create products or prices by hand — the superadmin Plans page does that via
+the Paddle REST API (§5). Just make sure `PADDLE_API_KEY` (§3) is set.
 
 ---
 
@@ -91,32 +89,38 @@ nothing until you rebuild `admin`.
 
 ---
 
-## 5. Wire the price IDs into `plans`
+## 5. Sync plans to Paddle
 
-Run `seed-plans` once to create the plan rows, then set each plan's monthly + yearly Paddle price
-id from the **superadmin panel → Plans** (`/platform/plans`) — one form per plan, a blank field
-clears that id. This calls `PATCH /v1/admin/platform/plans/{id}`.
+Run `seed-plans` once to create the plan rows, then go to the **superadmin panel → Plans**
+(`/platform/plans`):
 
 ```bash
 docker compose exec api python -m app.cli seed-plans   # if you haven't already
 ```
 
-If you'd rather do it in SQL:
+- **Sync to Paddle** (`POST /v1/admin/platform/plans/{id}/sync-paddle`) — creates one Paddle
+  product + a monthly and a yearly price matching `plans.monthly_price_usd` / `yearly_price_usd`,
+  and stores `paddle_product_id` / `paddle_monthly_price_id` / `paddle_yearly_price_id`. It is
+  create-if-missing: clicking it again on a fully-synced plan makes zero Paddle calls. Each create
+  carries a deterministic `Paddle-Idempotency-Key`, so a double-click can't produce duplicates.
+- **Change price** (`POST .../reprice`) — Paddle price amounts are immutable, so a price change
+  means new price objects. This creates them under the existing product, moves the old ids into
+  `paddle_*_price_id_previous`, and updates the USD amounts on the plan row in the same
+  transaction. **Existing subscribers are not migrated** — they stay on their current price until
+  they re-subscribe; the previous ids are kept so they can be reported on.
 
-```bash
-docker compose exec postgres psql -U rolewire -d rolewire -c \
-  "UPDATE plans SET paddle_monthly_price_id = 'pri_xxx', paddle_yearly_price_id = 'pri_yyy' WHERE name = 'basic';"
-```
-
-Verify:
+Verify against the Paddle dashboard (Catalog → Products) and:
 
 ```bash
 docker compose exec api python -m app.cli list-plans
 ```
 
-Until a plan's price ids are set, `start_checkout` raises `BillingConfigError` and the upgrade
-endpoint returns `503` naming the missing field — that's expected, not a bug, for plans you haven't
-finished configuring yet.
+Until a plan is synced, `start_checkout` raises `BillingConfigError` and the upgrade endpoint
+returns `503` — expected for a plan you haven't synced yet.
+
+A manual escape hatch still exists (`PATCH /v1/admin/platform/plans/{id}` with
+`paddle_monthly_price_id` / `paddle_yearly_price_id`, blank clears) for fixing a bad id without a
+re-sync; it is not exposed in the UI.
 
 ---
 

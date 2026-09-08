@@ -82,8 +82,13 @@ class Plan(Base):
     yearly_price_usd: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     monthly_price_bdt: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     yearly_price_bdt: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
+    paddle_product_id: Mapped[str | None] = mapped_column(Text)
     paddle_monthly_price_id: Mapped[str | None] = mapped_column(Text)
     paddle_yearly_price_id: Mapped[str | None] = mapped_column(Text)
+    # Set by the reprice flow before the active id is overwritten — Paddle prices are immutable, so
+    # a price change means a new price object and existing subscribers stay on the previous id.
+    paddle_monthly_price_id_previous: Mapped[str | None] = mapped_column(Text)
+    paddle_yearly_price_id_previous: Mapped[str | None] = mapped_column(Text)
     features: Mapped[dict[str, Any]] = mapped_column(JSONType, default=dict, nullable=False)
     created_at: Mapped[datetime] = _created_at()
 

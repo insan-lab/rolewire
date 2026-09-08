@@ -118,8 +118,16 @@ class PlatformPlanOut(ORMModel):
     yearly_price_usd: Decimal | None
     monthly_price_bdt: Decimal | None
     yearly_price_bdt: Decimal | None
+    paddle_product_id: str | None
     paddle_monthly_price_id: str | None
     paddle_yearly_price_id: str | None
+    paddle_monthly_price_id_previous: str | None
+    paddle_yearly_price_id_previous: str | None
+
+
+class PlatformPlanReprice(BaseModel):
+    new_monthly_price_usd: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
+    new_yearly_price_usd: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
 
 
 class PlatformInvoiceOut(BaseModel):
