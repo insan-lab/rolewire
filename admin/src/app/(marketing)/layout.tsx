@@ -50,7 +50,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
               and the files.
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-8 text-xs sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-8 text-xs sm:grid-cols-4">
             <FooterColumn title="Product">
               <Link href="/pricing">Pricing (global)</Link>
               <Link href="/pricing/bd">Pricing (Bangladesh)</Link>
@@ -59,6 +59,11 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
             <FooterColumn title="Company">
               <Link href="/about">About</Link>
               <Link href="/contact">Contact</Link>
+            </FooterColumn>
+            <FooterColumn title="Legal">
+              <Link href="/terms">Terms of Service</Link>
+              <Link href="/privacy">Privacy Policy</Link>
+              <Link href="/refund-policy">Refund Policy</Link>
             </FooterColumn>
             <FooterColumn title="Support">
               <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
