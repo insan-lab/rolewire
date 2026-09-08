@@ -93,16 +93,19 @@ nothing until you rebuild `admin`.
 
 ## 5. Wire the price IDs into `plans`
 
-There's no CLI flag or admin-panel UI for this yet — set the two Paddle price ids per plan directly
-in Postgres after `seed-plans` has created the rows:
+Run `seed-plans` once to create the plan rows, then set each plan's monthly + yearly Paddle price
+id from the **superadmin panel → Plans** (`/platform/plans`) — one form per plan, a blank field
+clears that id. This calls `PATCH /v1/admin/platform/plans/{id}`.
 
 ```bash
 docker compose exec api python -m app.cli seed-plans   # if you haven't already
+```
 
+If you'd rather do it in SQL:
+
+```bash
 docker compose exec postgres psql -U rolewire -d rolewire -c \
   "UPDATE plans SET paddle_monthly_price_id = 'pri_xxx', paddle_yearly_price_id = 'pri_yyy' WHERE name = 'basic';"
-docker compose exec postgres psql -U rolewire -d rolewire -c \
-  "UPDATE plans SET paddle_monthly_price_id = 'pri_aaa', paddle_yearly_price_id = 'pri_bbb' WHERE name = 'pro';"
 ```
 
 Verify:

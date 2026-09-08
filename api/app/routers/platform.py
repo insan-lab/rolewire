@@ -44,6 +44,8 @@ from app.schemas.platform import (
     PlatformJobOut,
     PlatformJobStatusUpdate,
     PlatformLoginRequest,
+    PlatformPlanOut,
+    PlatformPlanUpdate,
     PlatformRefreshRequest,
     PlatformStats,
     PlatformTokenPair,
@@ -400,6 +402,31 @@ async def list_billing(
         for invoice, tenant_name in rows.all()
     ]
     return Page[PlatformInvoiceOut](items=items, total=int(total), limit=limit, offset=offset)
+
+
+@router.get("/plans", response_model=list[PlatformPlanOut])
+async def list_plans(
+    admin: CurrentPlatformAdmin, session: DbSession
+) -> list[PlatformPlanOut]:
+    rows = await session.scalars(select(Plan).order_by(Plan.monthly_price_usd))
+    return [PlatformPlanOut.model_validate(plan, from_attributes=True) for plan in rows]
+
+
+@router.patch("/plans/{plan_id}", response_model=PlatformPlanOut)
+async def update_plan_paddle_ids(
+    admin: CurrentPlatformAdmin,
+    session: DbSession,
+    plan_id: uuid.UUID,
+    payload: PlatformPlanUpdate,
+) -> PlatformPlanOut:
+    plan = await session.scalar(select(Plan).where(Plan.id == plan_id))
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="plan not found")
+
+    plan.paddle_monthly_price_id = payload.paddle_monthly_price_id
+    plan.paddle_yearly_price_id = payload.paddle_yearly_price_id
+    await session.flush()
+    return PlatformPlanOut.model_validate(plan, from_attributes=True)
 
 
 @router.get("/contact-submissions", response_model=Page[ContactSubmissionOut])
