@@ -172,7 +172,7 @@ even though only one appears in `DATABASE_URL`.
   `HOSTED_S3_REGION`, `HOSTED_S3_ACCESS_KEY`, `HOSTED_S3_SECRET_KEY`.
 
 Webhook URLs (Paddle/UddoktaPay dashboards) need the domain to already resolve, so those get wired
-up in §9 after the first boot — chicken-and-egg with a domain that isn't live yet otherwise.
+up in §10 after the first boot — chicken-and-egg with a domain that isn't live yet otherwise.
 
 ---
 
@@ -225,7 +225,22 @@ naming the missing price id (`app/services/billing.py`) rather than failing sile
 
 ---
 
-## 8. Verify
+## 8. Create the platform superadmin
+
+No self-signup endpoint exists for platform admins on purpose (`docs/spec.md` §platform) — this
+script is the only way to create one:
+
+```bash
+docker compose exec api python -m app.scripts.create_platform_admin someone@rolewire.io
+```
+
+Prompts for a password (min 8 chars, entered twice to confirm). Fails with exit 1 if that email is
+already a platform admin. This is the account you use to log into `/platform`, not a regular
+tenant account.
+
+---
+
+## 9. Verify
 
 ```bash
 curl -s https://app.rolewire.com/health          # {"status":"ok","environment":"prod"}
@@ -238,7 +253,7 @@ real end-to-end check (Postgres write, RLS context, JWT cookie set, redirect to 
 
 ---
 
-## 9. Wire up webhook URLs
+## 10. Wire up webhook URLs
 
 Now that the domain resolves, point each provider's webhook at this host:
 
@@ -253,7 +268,7 @@ it's sent directly over SMTP, not through a provider that pushes delivery events
 
 ---
 
-## 10. Monitoring
+## 11. Monitoring
 
 Add `https://app.rolewire.com/health` as an Uptime Kuma HTTP monitor, matching the existing infra
 pattern (`docs/spec.md` §2). `/health/ready` is a stricter check if you want Redis outages to page
@@ -261,7 +276,7 @@ separately from the app being fully down.
 
 ---
 
-## 11. Backups
+## 12. Backups
 
 Nothing here is automated yet — set up at minimum:
 
@@ -278,7 +293,7 @@ somewhere the Postgres backup doesn't go (1Password/KMS), or a restored database
 
 ---
 
-## 12. Redeploying after a change
+## 13. Redeploying after a change
 
 ```bash
 git pull
@@ -299,11 +314,11 @@ scale that's an acceptable trade-off, not something worth a blue-green setup for
 
 ---
 
-## 13. Rollback
+## 14. Rollback
 
 ```bash
 git checkout <previous-tag-or-commit>
-docker compose build api worker admin   # admin needs the --build-arg flags from §12 again
+docker compose build api worker admin   # admin needs the --build-arg flags from §13 again
 docker compose up -d
 ```
 
@@ -318,7 +333,7 @@ under `api/alembic/versions/` before running it against real data.
 
 ---
 
-## 14. Troubleshooting
+## 15. Troubleshooting
 
 - **`api` container exits immediately on boot in prod** — almost always the config validator in
   `api/app/core/config.py` rejecting a short/default `JWT_SECRET`, missing `ENCRYPTION_KEY`, default
