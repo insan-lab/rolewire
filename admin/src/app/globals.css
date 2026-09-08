@@ -76,6 +76,72 @@
   .prose-plain p + p {
     margin-top: 1rem;
   }
+
+  /* Legal pages rendered from Markdown (src/app/(marketing)/[slug]). */
+  .legal-doc {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  .legal-doc h1 {
+    font-family: var(--font-display), Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+  }
+
+  .legal-doc h2 {
+    margin-top: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--paper);
+  }
+
+  .legal-doc h3 {
+    margin-top: 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--paper);
+  }
+
+  .legal-doc p,
+  .legal-doc ul,
+  .legal-doc ol {
+    margin-top: 1rem;
+  }
+
+  .legal-doc ul,
+  .legal-doc ol {
+    padding-left: 1.25rem;
+  }
+
+  .legal-doc ul {
+    list-style: disc;
+  }
+
+  .legal-doc ol {
+    list-style: decimal;
+  }
+
+  .legal-doc li + li {
+    margin-top: 0.375rem;
+  }
+
+  .legal-doc strong {
+    color: var(--paper);
+    font-weight: 600;
+  }
+
+  .legal-doc a {
+    color: var(--copper-bright);
+    text-decoration: none;
+  }
+
+  .legal-doc a:hover {
+    text-decoration: underline;
+  }
 }
 
 /* ─── Utility layer ───────────────────────────────────────────────────────── */
